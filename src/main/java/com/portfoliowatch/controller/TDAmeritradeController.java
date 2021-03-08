@@ -1,45 +1,58 @@
 package com.portfoliowatch.controller;
 
-import org.apache.http.client.utils.URIBuilder;
-import org.springframework.beans.factory.annotation.Value;
+import com.portfoliowatch.model.dto.ResponseDto;
+import com.portfoliowatch.model.tdameritrade.TDAmeriPositionDto;
+import com.portfoliowatch.model.tdameritrade.TDAmeriQuote;
+import com.portfoliowatch.service.TDAmeritradeService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletResponse;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 @RequestMapping("/td")
 @RestController
 public class TDAmeritradeController {
 
-    private final String TDAMER_AUTH_URL = "https://auth.tdameritrade.com/auth";
+    @Autowired
+    TDAmeritradeService tdAmeritradeService;
 
-    @Value("td-ameritrade.redirect")
-    private String redirectUrl;
+    @GetMapping("positions")
+    public ResponseEntity<List<TDAmeriPositionDto>> positions() {
+        return new ResponseEntity<>(tdAmeritradeService.getTDAccountPositions(), HttpStatus.OK);
+    }
 
-    @Value("td-ameritrade.client-id")
-    private  String clientId;
+    @GetMapping("quotes")
+    public ResponseEntity<Map<String, TDAmeriQuote>> quotes(@RequestParam List<String> symbols) {
+        return new ResponseEntity<>(tdAmeritradeService.getTDAccountQuotes(symbols), HttpStatus.OK);
+    }
 
     @GetMapping("login")
-    public String login(HttpServletResponse httpServletResponse) {
-        try {
-            URIBuilder uriBuilder = new URIBuilder(TDAMER_AUTH_URL);
-            uriBuilder.addParameter("response_type", "code");
-            uriBuilder.addParameter("redirect_uri", "");
-            uriBuilder.addParameter("client_id", "" + "%40AMER.OAUTHAP");
-            return uriBuilder.toString();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-            return null;
-        }
+    public ResponseEntity<String> login() {
+        return new ResponseEntity<>(tdAmeritradeService.getLoginURL(), HttpStatus.OK);
     }
 
     @GetMapping("oauth")
-    public void callback(@RequestParam String code) {
+    public ResponseEntity<ResponseDto<Boolean>> callback(@RequestParam String code) {
+        boolean data;
+        String error;
+        HttpStatus httpStatus;
+        try {
+            data = tdAmeritradeService.authorize(code);
+            error = null;
+            httpStatus = HttpStatus.OK;
+        } catch (IOException e) {
+            data = false;
+            error = e.getLocalizedMessage();
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+        return new ResponseEntity<>(new ResponseDto<>(data, error, httpStatus.value()), httpStatus);
     }
+
 }

@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class QuoteService {
 
     private static final Logger logger = LoggerFactory.getLogger(QuoteService.class);
 
-    @Value("alpha-vantage.key")
+    @Value("${alpha-vantage.key}")
     private String apiKey;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -92,7 +93,7 @@ public class QuoteService {
                             .setParameter("apikey", apiKey);
                     HttpGet get = new HttpGet(builder.build());
                     try (CloseableHttpResponse response = httpclient.execute(get)) {
-                        String responseString = EntityUtils.toString(response.getEntity(), "UTF-8");
+                        String responseString = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8.name());
                         Quote quote = mapQuote(responseString);
                         if (quote != null) {
                             quotes.add(quote);
