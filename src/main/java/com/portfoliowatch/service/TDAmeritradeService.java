@@ -1,12 +1,8 @@
 package com.portfoliowatch.service;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import com.portfoliowatch.model.tdameritrade.TDAmeriPosition;
-import com.portfoliowatch.model.tdameritrade.TDAmeriPositionDto;
 import com.portfoliowatch.model.tdameritrade.TDAmeriQuote;
 import com.portfoliowatch.model.tdameritrade.TDAmeriToken;
 import org.apache.commons.lang3.StringUtils;
@@ -47,6 +43,9 @@ public class TDAmeritradeService {
 
     private final Type tdAmeriQuoteMapType = new TypeToken<HashMap<String, TDAmeriQuote>>(){}.getType();
 
+    private final Type errorMapType = new TypeToken<HashMap<String, String>>(){}.getType();
+
+
     @Value("${td-ameritrade.redirect}")
     private String redirectUrl;
 
@@ -66,8 +65,9 @@ public class TDAmeritradeService {
         }
     }
 
-    public List<TDAmeriPositionDto> getTDAccountPositions() {
-        List<TDAmeriPositionDto> positions = new LinkedList<>();
+    public List<TDAmeriPosition> getTDAccountPositions() throws IOException, URISyntaxException {
+        List<TDAmeriPosition> positions = new LinkedList<>();
+        String responseJson = "";
         try (CloseableHttpClient httpclient = HttpClients.custom().build()) {
             String TD_AMER_TOKEN_URL = "https://api.tdameritrade.com/v1/accounts";
             URIBuilder builder = new URIBuilder(TD_AMER_TOKEN_URL);
@@ -75,7 +75,7 @@ public class TDAmeritradeService {
             HttpGet get = new HttpGet(builder.build());
             get.addHeader("Authorization", this.getBearerToken());
             try (CloseableHttpResponse response = httpclient.execute(get)) {
-                String responseJson = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8.name());
+                responseJson = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8.name());
                 JsonArray convertedObject = new Gson().fromJson(responseJson, JsonArray.class);
                 for (JsonElement accountElement : convertedObject) {
                     JsonObject accountObject = accountElement.getAsJsonObject();
@@ -84,17 +84,22 @@ public class TDAmeritradeService {
                     List<TDAmeriPosition> tdAmeriPositions = gson.fromJson(positionsArray.toString(), tdAmeriPositionListType);
                     for (TDAmeriPosition td : tdAmeriPositions) {
                         String symbol = td.getInstrument().getSymbol();
-                        Optional<TDAmeriPositionDto> exists = positions.stream().filter(p -> p.getSymbol().equals(symbol)).findAny();
+                        Optional<TDAmeriPosition> exists = positions.stream().filter(p -> p.getInstrument().getSymbol().equals(symbol)).findAny();
                         if (exists.isPresent()) {
                             exists.get().applyNewShares(td);
                         } else {
-                            positions.add(new TDAmeriPositionDto(td));
+                            positions.add(td);
                         }
                     }
                 }
             }
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+        } catch (JsonSyntaxException jse) {
+            if (!StringUtils.isEmpty(responseJson)) {
+                Map<String, String> map = gson.fromJson(responseJson, errorMapType);
+                if (map.get("error") != null) {
+                    throw new IOException(map.get("error"));
+                }
+            }
         }
         return positions;
     }

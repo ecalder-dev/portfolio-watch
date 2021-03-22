@@ -1,7 +1,7 @@
 package com.portfoliowatch.controller;
 
 import com.portfoliowatch.model.dto.ResponseDto;
-import com.portfoliowatch.model.tdameritrade.TDAmeriPositionDto;
+import com.portfoliowatch.model.tdameritrade.TDAmeriPosition;
 import com.portfoliowatch.model.tdameritrade.TDAmeriQuote;
 import com.portfoliowatch.service.TDAmeritradeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
@@ -24,8 +25,12 @@ public class TDAmeritradeController {
     TDAmeritradeService tdAmeritradeService;
 
     @GetMapping("positions")
-    public ResponseEntity<List<TDAmeriPositionDto>> positions() {
-        return new ResponseEntity<>(tdAmeritradeService.getTDAccountPositions(), HttpStatus.OK);
+    public ResponseEntity<List<TDAmeriPosition>> positions() {
+        try {
+            return new ResponseEntity<>(tdAmeritradeService.getTDAccountPositions(), HttpStatus.OK);
+        } catch (IOException | URISyntaxException e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("quotes")

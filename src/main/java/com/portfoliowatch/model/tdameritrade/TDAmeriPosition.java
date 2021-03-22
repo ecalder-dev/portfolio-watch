@@ -17,4 +17,11 @@ public class TDAmeriPosition {
     private Double settledLongQuantity;
     private Double settledShortQuantity;
     private Double maintenanceRequirement;
+
+    public void applyNewShares(TDAmeriPosition tdAmeriPosition) {
+        double initCostBasis = this.settledLongQuantity * this.averagePrice;
+        double addedCostBasis = tdAmeriPosition.getSettledLongQuantity() * tdAmeriPosition.getAveragePrice();
+        this.settledLongQuantity += tdAmeriPosition.getSettledLongQuantity();
+        this.averagePrice = (initCostBasis + addedCostBasis) / this.settledLongQuantity;
+    }
 }
