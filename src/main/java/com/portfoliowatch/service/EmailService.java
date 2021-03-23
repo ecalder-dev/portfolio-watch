@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import javax.mail.internet.MimeMessage;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.*;
 
 @Service
@@ -33,6 +35,8 @@ public class EmailService {
 
     private double totalAssetChange = 0;
 
+    private final DecimalFormat currencyFormat = new DecimalFormat("$#,##0.00;-$#,##0.00");
+
     public void sendReport(String to) throws Exception {
         MimeMessage message = emailSender.createMimeMessage();
 
@@ -50,11 +54,11 @@ public class EmailService {
 
         result = result.replace("[first_name]", "there");
         result = result.replace("[stock_table]", createStockTable(positions, profiles));
-        result = result.replace("[total_asset_value]", String.valueOf(totalAssetValue));
+        result = result.replace("[total_asset_value]", currencyFormat.format(totalAssetValue));
         String totalAssetChangeColor = totalAssetChange >= 0 ? "green" : "red";
         result = result.replace("[total_asset_change]",
-                String.format("<span style=\"color:%s\">$%.2f</span>",
-                        totalAssetChangeColor, totalAssetChange));
+                String.format("<span style=\"color:%s\">%s</span>",
+                        totalAssetChangeColor, currencyFormat.format(totalAssetChange)));
         helper.setText(result, true);
         helper.setSubject("Daily Watch Report");
         emailSender.send(message);
@@ -113,6 +117,7 @@ public class EmailService {
         private void buildReport() {
             headers.add("Symbol");
             headers.add("Change %");
+            headers.add("Change $");
             headers.add("Current $");
             headers.add("Portfolio %");
             headers.add("Sector");
@@ -135,7 +140,9 @@ public class EmailService {
                 Map<String, String> columns = new HashMap<>();
                 columns.put("Symbol", String.format("<label title=\"%s\">%s</label>", companyName, symbol));
                 columns.put("Change %", String.format("%.2f%%", position.getCurrentDayProfitLossPercentage()));
-                columns.put("Current $", String.format("$%.2f", price));
+                columns.put("Change $", String.format("%s",
+                        currencyFormat.format(position.getCurrentDayProfitLoss() / position.getLongQuantity())));
+                columns.put("Current $", String.format("%s", currencyFormat.format(price)));
                 columns.put("Portfolio %", String.format("%.2f%%", ((position.getSettledLongQuantity() * price) /
                         totalAssetValue) * 100));
                 columns.put("Sector", sector);

@@ -13,6 +13,6 @@ public class TDAmeriPositionDtoComparator implements Comparator<TDAmeriPosition>
         if (comparison == 0) {
             comparison = pos1.getInstrument().getSymbol().compareTo(pos2.getInstrument().getSymbol());
         }
-        return comparison;
+        return comparison * -1;
     }
 }
