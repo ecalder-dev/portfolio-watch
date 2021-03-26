@@ -1,5 +1,4 @@
 FROM openjdk:8-jdk-alpine
-EXPOSE 11001
 ADD /target/portfolio-watch-0.0.1-SNAPSHOT.jar portfolio-watch.jar
 ENTRYPOINT ["java", "-jar", "portfolio-watch-0.0.1-SNAPSHOT.jar"]
 CMD  ["java","-Dspring.mail.username=${EMAIL_USER}",
