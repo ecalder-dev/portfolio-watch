@@ -2,7 +2,6 @@ package com.portfoliowatch.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.ResourceUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,20 +9,21 @@ import java.io.IOException;
 @Configuration
 public class TDAmeritradeConfig {
 
+    private final File TOKEN_FILE =  new File("src/main/resources/td_token.json");
+
     @Bean
     public File getTokenFile() throws IOException {
-        File tokenFile = ResourceUtils.getFile("classpath:td_token.json");
-        if (tokenFile.exists()) {
-            if (tokenFile.isDirectory()) {
-                throw new IOException(tokenFile.getAbsolutePath() + " is not allowed to be a directory.");
+        if (TOKEN_FILE.exists()) {
+            if (TOKEN_FILE.isDirectory()) {
+                throw new IOException(TOKEN_FILE.getAbsolutePath() + " is not allowed to be a directory.");
             } else {
-                return tokenFile;
+                return TOKEN_FILE;
             }
         } else {
-            if (tokenFile.createNewFile()) {
-                return tokenFile;
+            if (TOKEN_FILE.createNewFile()) {
+                return TOKEN_FILE;
             } else {
-                throw new IOException(tokenFile.getAbsolutePath() + " could not be created.");
+                throw new IOException(TOKEN_FILE.getAbsolutePath() + " could not be created.");
             }
         }
     }
