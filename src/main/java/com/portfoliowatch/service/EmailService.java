@@ -40,6 +40,8 @@ public class EmailService {
 
     public void sendReport(String to) throws Exception {
         MimeMessage message = emailSender.createMimeMessage();
+        totalAssetValue = 0;
+        totalAssetChange = 0;
 
         String result = "";
 
