@@ -46,18 +46,10 @@ public class TDAmeritradeController {
     @GetMapping("oauth")
     public ResponseEntity<ResponseDto<Boolean>> callback(@RequestParam String code) {
         boolean data;
-        String error;
         HttpStatus httpStatus;
-        try {
-            data = tdAmeritradeService.authorize(code);
-            error = null;
-            httpStatus = HttpStatus.OK;
-        } catch (IOException e) {
-            data = false;
-            error = e.getLocalizedMessage();
-            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-        }
-        return new ResponseEntity<>(new ResponseDto<>(data, error, httpStatus.value()), httpStatus);
+        data = tdAmeritradeService.authorize(code);
+        httpStatus = HttpStatus.OK;
+        return new ResponseEntity<>(new ResponseDto<>(data, null, httpStatus.value()), httpStatus);
     }
 
 }

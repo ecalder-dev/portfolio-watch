@@ -18,24 +18,19 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.*;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.*;
 
 @Service
 public class TDAmeritradeService {
 
     private static final Logger logger = LoggerFactory.getLogger(TDAmeritradeService.class);
-
-    @Autowired
-    private File tokenFile;
 
     private final Gson gson = new Gson();
 
@@ -45,12 +40,13 @@ public class TDAmeritradeService {
 
     private final Type errorMapType = new TypeToken<HashMap<String, String>>(){}.getType();
 
-
     @Value("${td-ameritrade.redirect}")
     private String redirectUrl;
 
     @Value("${td-ameritrade.client-id}")
     private  String clientId;
+
+    private TDAmeriToken token;
 
     public String getLoginURL() {
         try {
@@ -123,39 +119,25 @@ public class TDAmeritradeService {
         return quotes;
     }
 
-    public boolean authorize(String decodedAuthCode) throws IOException {
-        TDAmeriToken tdAmeriToken = this.getNewAccessAndRefreshToken(decodedAuthCode);
-        this.storeToken(tdAmeriToken);
+    public boolean authorize(String decodedAuthCode) {
+        token = this.getNewAccessAndRefreshToken(decodedAuthCode);
         return true;
     }
 
     private String getBearerToken() {
-        TDAmeriToken token = readTDAmeriToken();
         if (token == null) { return null; }
         long currentTimeSeconds = System.currentTimeMillis();
         long accessDiff = (currentTimeSeconds - token.getAccessTokenTimestamp()) / 1000;
         long refreshDiff = (currentTimeSeconds - token.getRefreshTokenTimestamp()) / 1000;
         if (refreshDiff >= (token.getRefreshTokenExpiresIn() - 3600)) {
-            token = this.getNewRefreshToken(token.getRefreshToken());
-            try {
-                this.storeToken(token);
-            } catch (IOException e) {
-                return null;
-            }
+            this.token = this.getNewRefreshToken(token.getRefreshToken());
         } else if (accessDiff >= token.getExpiresIn()) {
             TDAmeriToken newAccessToken = this.getNewAccessToken(token.getRefreshToken());
             if (newAccessToken == null) { return null; }
             token.setAccessToken(newAccessToken.getAccessToken());
             token.setAccessTokenTimestamp(currentTimeSeconds);
-            try {
-                this.storeToken(token);
-            } catch (IOException e) {
-                return null;
-            }
         }
-
         return "Bearer " + token.getAccessToken();
-
     }
 
     private TDAmeriToken getNewAccessAndRefreshToken(String authorizationCode) {
@@ -213,26 +195,4 @@ public class TDAmeritradeService {
         }
         return token;
     }
-
-    private TDAmeriToken readTDAmeriToken() {
-        try {
-            String tokenString = new String(Files.readAllBytes(tokenFile.toPath()));
-            return gson.fromJson(tokenString, TDAmeriToken.class);
-        } catch (IOException e) {
-            logger.info(e.getLocalizedMessage(), e);
-        }
-        return null;
-    }
-
-    private void storeToken(TDAmeriToken token) throws IOException {
-        assert(token != null);
-        try (Writer writer = new FileWriter(tokenFile, false)) {
-            writer.write(gson.toJson(token));
-        }
-    }
-
-
-
-
-
 }

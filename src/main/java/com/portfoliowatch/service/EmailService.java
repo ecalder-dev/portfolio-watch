@@ -3,6 +3,7 @@ package com.portfoliowatch.service;
 import com.portfoliowatch.model.financialmodelingprep.FMPProfile;
 import com.portfoliowatch.model.tdameritrade.TDAmeriPosition;
 import com.portfoliowatch.util.TDAmeriPositionDtoComparator;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +12,10 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import javax.mail.internet.MimeMessage;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.*;
 
 @Service
@@ -39,9 +40,18 @@ public class EmailService {
 
     public void sendReport(String to) throws Exception {
         MimeMessage message = emailSender.createMimeMessage();
+        totalAssetValue = 0;
+        totalAssetChange = 0;
 
-        String templateLocation = "src/main/resources/templates/ReportTemplate.html";
-        String result = new String(Files.readAllBytes(Paths.get(templateLocation)));
+        String result = "";
+
+        try ( InputStream inputStream = getClass().getClassLoader().getResourceAsStream("templates/ReportTemplate.html")) {
+            assert inputStream != null;
+            StringWriter writer = new StringWriter();
+            IOUtils.copy(inputStream, writer, StandardCharsets.UTF_8.name());
+            result = writer.toString();
+        }
+
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
         helper.setTo(to);
         List<TDAmeriPosition> positions = tdAmeritradeService.getTDAccountPositions();
