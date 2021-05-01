@@ -29,15 +29,23 @@ public class Transaction {
     @Column(name = "price")
     private Double price;
 
-    @Column
+    @ManyToOne
+    @JoinColumn(name="account_id")
+    private Account account;
+
+    @Column(name = "date_transacted")
+    @Temporal(TemporalType.DATE)
+    private Date date;
+
+    @Column(name = "date_settled")
     @Temporal(TemporalType.DATE)
     private Date dateSettled;
 
-    @Column
+    @Column(name = "date_inserted")
     @Temporal(TemporalType.TIMESTAMP)
     private Date datetimeInserted;
 
-    @Column
+    @Column(name = "date_updated")
     @Temporal(TemporalType.TIMESTAMP)
     private Date datetimeUpdated;
 

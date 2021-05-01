@@ -1,8 +1,7 @@
 package com.portfoliowatch.controller;
 
-import com.portfoliowatch.model.Transaction;
-import com.portfoliowatch.model.dto.ResponseDto;
-import com.portfoliowatch.service.TransactionService;
+import com.portfoliowatch.model.Account;
+import com.portfoliowatch.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,17 +11,31 @@ import java.util.List;
 
 @RequestMapping("/api")
 @RestController
-public class TransactionController {
+public class AccountController {
 
     @Autowired
-    TransactionService transactionService;
+    AccountService accountService;
 
-    @PostMapping("/transaction")
-    public ResponseEntity<Transaction> createTransaction(@RequestBody Transaction transaction) {
-        Transaction data;
+    @PostMapping("/account")
+    public ResponseEntity<Account> createAccount(@RequestBody Account account) {
+        Account data;
         HttpStatus httpStatus;
         try {
-            data = transactionService.createTransaction(transaction);
+            data = accountService.createAccount(account);
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            data = null;
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+        return new ResponseEntity<>(data, httpStatus);
+    }
+    
+    @GetMapping("/accounts")
+    public ResponseEntity<List<Account>> readAllAccounts() {
+        List<Account> data;
+        HttpStatus httpStatus;
+        try {
+            data = accountService.readAllAccounts();
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             data = null;
@@ -31,26 +44,12 @@ public class TransactionController {
         return new ResponseEntity<>(data, httpStatus);
     }
 
-    @GetMapping("/transactions")
-    public ResponseEntity<List<Transaction>> readAllTransactions() {
-        List<Transaction> data;
+    @PutMapping("/account")
+    public ResponseEntity<Account> updateAccount(@RequestBody Account account) {
+        Account data;
         HttpStatus httpStatus;
         try {
-            data = transactionService.readAllTransactions();
-            httpStatus = HttpStatus.OK;
-        } catch (Exception e) {
-            data = null;
-            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-        }
-        return new ResponseEntity<>(data, httpStatus);
-    }
-
-    @PutMapping("/transaction")
-    public ResponseEntity<Transaction> updateTransaction(@RequestBody Transaction transaction) {
-        Transaction data;
-        HttpStatus httpStatus;
-        try {
-            data = transactionService.updateTransaction(transaction);
+            data = accountService.updateAccount(account);
             if (data != null) {
                 httpStatus = HttpStatus.OK;
             } else {
@@ -63,12 +62,12 @@ public class TransactionController {
         return new ResponseEntity<>(data, httpStatus);
     }
 
-    @DeleteMapping("/transaction")
-    public ResponseEntity<Boolean> deleteTransaction(@RequestBody Transaction transaction) {
+    @DeleteMapping("/account")
+    public ResponseEntity<Boolean> deleteAccount(@RequestBody Account account) {
         boolean data;
         HttpStatus httpStatus;
         try {
-            data = transactionService.deleteTransaction(transaction);
+            data = accountService.deleteAccount(account);
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             data = false;
