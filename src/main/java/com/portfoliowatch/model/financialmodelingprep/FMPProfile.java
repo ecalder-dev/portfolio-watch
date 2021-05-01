@@ -17,6 +17,7 @@ public class FMPProfile {
     private Double beta;
     private Long volAvg;
     private Long mktCap;
+    private Double lastDiv;
     private String range;
     private Double changes;
     private String companyName;
