@@ -14,7 +14,8 @@ public class Summary {
     private Double costBasis;
     private Double currentPrice;
     private Long averageVolume;
-    private Double changes;
+    private Double dollarChange;
+    private Double percentChange;
     private String companyName;
     private String industry;
     private String sector;
@@ -29,11 +30,12 @@ public class Summary {
         if (fmpProfile != null) {
             this.currentPrice = fmpProfile.getPrice();
             this.averageVolume = fmpProfile.getVolAvg();
-            this.changes = fmpProfile.getChanges();
+            this.dollarChange = fmpProfile.getChanges();
             this.companyName = fmpProfile.getCompanyName();
-            this.industry = fmpProfile.getCompanyName();
+            this.industry = fmpProfile.getIndustry();
             this.sector = fmpProfile.getSector();
             this.isEtf = fmpProfile.getIsEtf();
+            this.percentChange = (currentPrice / (currentPrice - dollarChange)) - 1;
         }
     }
 }

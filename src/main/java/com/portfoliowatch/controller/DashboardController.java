@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@RequestMapping("/dashboard")
+@RequestMapping("/api/dashboard")
 @RestController
 public class DashboardController {
 
