@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TDAmeriPositionInstrument {
+public class TDAmeriInstrument {
     private String assetType;
     private String cusip;
     private String symbol;

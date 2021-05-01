@@ -1,6 +1,8 @@
 package com.portfoliowatch.controller;
 
+import com.portfoliowatch.model.Summary;
 import com.portfoliowatch.model.financialmodelingprep.FMPProfile;
+import com.portfoliowatch.service.DashboardService;
 import com.portfoliowatch.service.FMPService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,25 +14,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
-@RequestMapping("/fmp")
+@RequestMapping("/dashboard")
 @RestController
-public class FMPController {
+public class DashboardController {
 
-    private static final Logger logger = LoggerFactory.getLogger(FMPController.class);
+    private static final Logger logger = LoggerFactory.getLogger(DashboardController.class);
 
     @Autowired
-    FMPService fmpService;
+    DashboardService dashboardService;
 
-    @GetMapping("profiles")
-    public ResponseEntity<List<FMPProfile>> getProfiles(@RequestParam List<String> symbols) {
-        List<FMPProfile> data;
+    @GetMapping("summaries")
+    public ResponseEntity<List<Summary>> getSummaries() {
+        List<Summary> data;
         HttpStatus httpStatus;
         try {
-            data = fmpService.getCompanyProfile(symbols);
+            data = dashboardService.getSummaryList();
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             data = null;

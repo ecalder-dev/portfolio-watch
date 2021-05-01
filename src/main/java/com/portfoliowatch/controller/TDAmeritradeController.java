@@ -3,6 +3,7 @@ package com.portfoliowatch.controller;
 import com.portfoliowatch.model.dto.ResponseDto;
 import com.portfoliowatch.model.tdameritrade.TDAmeriPosition;
 import com.portfoliowatch.model.tdameritrade.TDAmeriQuote;
+import com.portfoliowatch.model.tdameritrade.TDAmeriTransaction;
 import com.portfoliowatch.service.TDAmeritradeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +30,15 @@ public class TDAmeritradeController {
     public ResponseEntity<List<TDAmeriPosition>> positions() {
         try {
             return new ResponseEntity<>(tdAmeritradeService.getTDAccountPositions(), HttpStatus.OK);
+        } catch (IOException | URISyntaxException e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("transactions")
+    public ResponseEntity<List<TDAmeriTransaction>> transactions() {
+        try {
+            return new ResponseEntity<>(tdAmeritradeService.refreshTDTransactionRecord(), HttpStatus.OK);
         } catch (IOException | URISyntaxException e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }

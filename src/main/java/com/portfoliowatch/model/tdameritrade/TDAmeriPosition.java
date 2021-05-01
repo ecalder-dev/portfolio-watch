@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter @Getter
 @NoArgsConstructor @AllArgsConstructor
 public class TDAmeriPosition {
-    private TDAmeriPositionInstrument instrument;
+    private TDAmeriInstrument instrument;
     private Double shortQuantity;
     private Double averagePrice;
     private Double currentDayProfitLoss;

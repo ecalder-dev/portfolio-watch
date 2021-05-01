@@ -2,9 +2,12 @@ package com.portfoliowatch.service;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+import com.portfoliowatch.model.Transaction;
 import com.portfoliowatch.model.tdameritrade.TDAmeriPosition;
 import com.portfoliowatch.model.tdameritrade.TDAmeriQuote;
 import com.portfoliowatch.model.tdameritrade.TDAmeriToken;
+import com.portfoliowatch.model.tdameritrade.TDAmeriTransaction;
+import com.portfoliowatch.repository.TransactionRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -18,6 +21,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +42,15 @@ public class TDAmeritradeService {
 
     private final Type tdAmeriQuoteMapType = new TypeToken<HashMap<String, TDAmeriQuote>>(){}.getType();
 
+    private final Type tdAmeriTransactionListType = new TypeToken<ArrayList<TDAmeriTransaction>>(){}.getType();
+
     private final Type errorMapType = new TypeToken<HashMap<String, String>>(){}.getType();
+
+    @Autowired
+    private TransactionRepository transactionRepository;
+
+    @Value("${td-ameritrade.account-id}")
+    private String accountId;
 
     @Value("${td-ameritrade.redirect}")
     private String redirectUrl;
@@ -98,6 +110,24 @@ public class TDAmeritradeService {
             }
         }
         return positions;
+    }
+
+    public List<TDAmeriTransaction> refreshTDTransactionRecord()  throws IOException, URISyntaxException {
+        List<TDAmeriTransaction> transactions = new LinkedList<>();
+        String responseJson = "";
+        try (CloseableHttpClient httpclient = HttpClients.custom().build()) {
+            String TD_AMERI_URL = String.format("https://api.tdameritrade.com/v1/accounts/%s/transactions", accountId);
+            URIBuilder builder = new URIBuilder(TD_AMERI_URL);
+            HttpGet get = new HttpGet(builder.build());
+            get.addHeader("Authorization", this.getBearerToken());
+            try (CloseableHttpResponse response = httpclient.execute(get)) {
+                responseJson = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8.name());
+                transactions = gson.fromJson(responseJson, tdAmeriTransactionListType);
+            }
+        } catch (JsonSyntaxException jse) {
+            throw new IOException(jse);
+        }
+        return transactions;
     }
 
     public Map<String, TDAmeriQuote> getTDAccountQuotes(List<String> symbols) {
