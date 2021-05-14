@@ -68,7 +68,7 @@ public class AccountController {
         HttpStatus httpStatus;
         try {
             data = accountService.deleteAccount(account);
-            httpStatus = HttpStatus.OK;
+            httpStatus = data ? HttpStatus.OK : HttpStatus.CONFLICT;
         } catch (Exception e) {
             data = false;
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;

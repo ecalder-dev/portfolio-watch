@@ -19,7 +19,12 @@ public class TransactionService {
         return transactionRepository.findAll();
     }
 
+    public Transaction readTransactionById(Long id) {
+        return transactionRepository.findById(id).orElse(null);
+    }
+
     public Transaction createTransaction(Transaction transaction) {
+        transaction.setSymbol(transaction.getSymbol().toUpperCase());
         transaction.setTransactionId(null);
         transaction.setDatetimeUpdated(new Date());
         transaction.setDatetimeInserted(new Date());
@@ -32,6 +37,7 @@ public class TransactionService {
     }
 
     public Transaction updateTransaction(Transaction transaction) {
+        transaction.setSymbol(transaction.getSymbol().toUpperCase());
         transaction.setDatetimeUpdated(new Date());
         return transactionRepository.save(transaction);
     }

@@ -1,7 +1,6 @@
 package com.portfoliowatch.controller;
 
 import com.portfoliowatch.model.Transaction;
-import com.portfoliowatch.model.dto.ResponseDto;
 import com.portfoliowatch.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -38,6 +37,20 @@ public class TransactionController {
         try {
             data = transactionService.readAllTransactions();
             httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            data = null;
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+        return new ResponseEntity<>(data, httpStatus);
+    }
+
+    @GetMapping("/transaction/{id}")
+    public ResponseEntity<Transaction> readAllTransactions(@PathVariable("id") Long id) {
+        Transaction data;
+        HttpStatus httpStatus;
+        try {
+            data = transactionService.readTransactionById(id);
+            httpStatus = data == null ? HttpStatus.NOT_FOUND : HttpStatus.OK;
         } catch (Exception e) {
             data = null;
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;

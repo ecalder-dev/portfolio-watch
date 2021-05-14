@@ -1,7 +1,5 @@
 package com.portfoliowatch.model;
 
-import com.sun.istack.NotNull;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -35,7 +33,7 @@ public class Transaction {
 
     @Column(name = "date_transacted")
     @Temporal(TemporalType.DATE)
-    private Date date;
+    private Date dateTransacted;
 
     @Column(name = "date_settled")
     @Temporal(TemporalType.DATE)
@@ -48,5 +46,4 @@ public class Transaction {
     @Column(name = "date_updated")
     @Temporal(TemporalType.TIMESTAMP)
     private Date datetimeUpdated;
-
 }

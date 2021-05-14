@@ -1,9 +1,11 @@
 package com.portfoliowatch.model.financialmodelingprep;
 
+import antlr.StringUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.jsoup.internal.StringUtil;
 
 import java.util.Comparator;
 
@@ -46,4 +48,12 @@ public class FMPProfile {
     private Boolean defaultImage;
     private Boolean isEtf;
     private Boolean isActivelyTrading;
+
+    public String getSector() {
+        if (StringUtil.isBlank(this.sector) && this.isEtf) {
+            return "ETF";
+        } else {
+            return this.sector;
+        }
+    }
 }
