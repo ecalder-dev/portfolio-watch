@@ -3,8 +3,11 @@ package com.portfoliowatch.controller;
 import com.portfoliowatch.model.dto.ResponseDto;
 import com.portfoliowatch.model.tdameritrade.TDAmeriPosition;
 import com.portfoliowatch.model.tdameritrade.TDAmeriQuote;
+import com.portfoliowatch.model.tdameritrade.TDAmeriToken;
 import com.portfoliowatch.model.tdameritrade.TDAmeriTransaction;
 import com.portfoliowatch.service.TDAmeritradeService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,13 +18,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
 @RequestMapping("/td")
 @RestController
 public class TDAmeritradeController {
+
+    private static final Logger logger = LoggerFactory.getLogger(TDAmeritradeController.class);
 
     @Autowired
     TDAmeritradeService tdAmeritradeService;
@@ -31,6 +35,7 @@ public class TDAmeritradeController {
         try {
             return new ResponseEntity<>(tdAmeritradeService.getTDAccountPositions(), HttpStatus.OK);
         } catch (IOException | URISyntaxException e) {
+            logger.error(e.getLocalizedMessage(), e);
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -38,8 +43,9 @@ public class TDAmeritradeController {
     @GetMapping("transactions")
     public ResponseEntity<List<TDAmeriTransaction>> transactions() {
         try {
-            return new ResponseEntity<>(tdAmeritradeService.refreshTDTransactionRecord(), HttpStatus.OK);
+            return new ResponseEntity<>(tdAmeritradeService.getTDTransactions(), HttpStatus.OK);
         } catch (IOException | URISyntaxException e) {
+            logger.error(e.getLocalizedMessage(), e);
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -55,12 +61,12 @@ public class TDAmeritradeController {
     }
 
     @GetMapping("oauth")
-    public ResponseEntity<ResponseDto<Boolean>> callback(@RequestParam String code) {
+    public ResponseEntity<ResponseDto<TDAmeriToken>> callback(@RequestParam String code) {
         boolean data;
         HttpStatus httpStatus;
-        data = tdAmeritradeService.authorize(code);
+        TDAmeriToken token = tdAmeritradeService.authorize(code);
         httpStatus = HttpStatus.OK;
-        return new ResponseEntity<>(new ResponseDto<>(data, null, httpStatus.value()), httpStatus);
+        return new ResponseEntity<>(new ResponseDto<>(token, null, httpStatus.value()), httpStatus);
     }
 
 }

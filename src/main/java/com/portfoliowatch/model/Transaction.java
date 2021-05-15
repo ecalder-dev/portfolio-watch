@@ -28,7 +28,7 @@ public class Transaction {
     private Double price;
 
     @ManyToOne
-    @JoinColumn(name="account_id")
+    @JoinColumn(name = "fk_transaction_account")
     private Account account;
 
     @Column(name = "date_transacted")

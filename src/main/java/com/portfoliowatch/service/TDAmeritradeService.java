@@ -2,7 +2,6 @@ package com.portfoliowatch.service;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-import com.portfoliowatch.model.Transaction;
 import com.portfoliowatch.model.tdameritrade.TDAmeriPosition;
 import com.portfoliowatch.model.tdameritrade.TDAmeriQuote;
 import com.portfoliowatch.model.tdameritrade.TDAmeriToken;
@@ -112,8 +111,8 @@ public class TDAmeritradeService {
         return positions;
     }
 
-    public List<TDAmeriTransaction> refreshTDTransactionRecord()  throws IOException, URISyntaxException {
-        List<TDAmeriTransaction> transactions = new LinkedList<>();
+    public List<TDAmeriTransaction> getTDTransactions()  throws IOException, URISyntaxException {
+        List<TDAmeriTransaction> transactions;
         String responseJson = "";
         try (CloseableHttpClient httpclient = HttpClients.custom().build()) {
             String TD_AMERI_URL = String.format("https://api.tdameritrade.com/v1/accounts/%s/transactions", accountId);
@@ -149,9 +148,9 @@ public class TDAmeritradeService {
         return quotes;
     }
 
-    public boolean authorize(String decodedAuthCode) {
+    public TDAmeriToken authorize(String decodedAuthCode) {
         token = this.getNewAccessAndRefreshToken(decodedAuthCode);
-        return true;
+        return token;
     }
 
     private String getBearerToken() {

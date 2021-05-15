@@ -40,7 +40,7 @@ public class AccountService {
         //prevent deletion if there are still transactions associated to this account.
         List<Transaction> transactions = transactionRepository.findAllByAccountId(account.getAccountId());
         if (transactions.isEmpty()) {
-            //accountRepository.delete(account);
+            accountRepository.delete(account);
         } else {
             return false;
         }
