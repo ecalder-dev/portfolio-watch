@@ -27,6 +27,9 @@ public class Transaction {
     @Column(name = "price")
     private Double price;
 
+    @Column(name = "execution_priority")
+    private Integer executionPriority;
+
     @ManyToOne
     @JoinColumn(name = "fk_transaction_account")
     private Account account;

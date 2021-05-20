@@ -35,7 +35,7 @@ public class TransactionController {
         List<Transaction> data;
         HttpStatus httpStatus;
         try {
-            data = transactionService.readAllTransactions();
+            data = transactionService.readAllTransactions(null);
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             data = null;
