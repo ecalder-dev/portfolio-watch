@@ -15,7 +15,7 @@ import java.util.Optional;
 public class PositionService {
 
     @Autowired
-    PositionRepository positionRepository;
+    private PositionRepository positionRepository;
 
     public List<Position> readAllPositions() {
         return positionRepository.findAll();

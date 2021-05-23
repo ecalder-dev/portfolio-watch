@@ -2,13 +2,14 @@ package com.portfoliowatch.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.Date;
 
 @Getter @Setter
-@Entity
-@Table(name = "account")
+@Entity @ToString
+@Table(name = "accounts")
 public class Account {
 
     @Id

@@ -5,6 +5,7 @@ import com.portfoliowatch.model.Transaction;
 import com.portfoliowatch.repository.AccountRepository;
 import com.portfoliowatch.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -37,8 +38,7 @@ public class AccountService {
     }
 
     public boolean deleteAccount(Account account) {
-        //prevent deletion if there are still transactions associated to this account.
-        List<Transaction> transactions = transactionRepository.findAllByAccountId(account.getAccountId());
+        List<Transaction> transactions = transactionRepository.findAllOrdered();
         if (transactions.isEmpty()) {
             accountRepository.delete(account);
         } else {
@@ -46,6 +46,5 @@ public class AccountService {
         }
         return true;
     }
-
 
 }

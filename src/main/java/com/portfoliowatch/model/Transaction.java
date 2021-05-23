@@ -2,12 +2,13 @@ package com.portfoliowatch.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.Date;
 
 @Getter @Setter
-@Entity
+@Entity @ToString
 @Table(name = "transactions")
 public class Transaction {
 
