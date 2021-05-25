@@ -58,7 +58,6 @@ public class AccountService {
     public Map<Long, Map<String, LotList>>  generateLotData() {
         List<Transaction> transactionList = transactionRepository.findAllOrdered();
         for (Transaction transaction: transactionList) {
-            System.out.println(transaction);
             switch (transaction.getType().toUpperCase()) {
                 case "B":
                 case "G":
