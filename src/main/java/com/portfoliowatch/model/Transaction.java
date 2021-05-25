@@ -17,9 +17,10 @@ public class Transaction {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long transactionId;
 
+    @Column(name ="type", length = 3)
     private String type;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 5)
     private String symbol;
 
     @Column(name = "shares")

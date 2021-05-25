@@ -12,7 +12,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     @Query("SELECT t FROM Transaction t " +
             "ORDER by t.dateTransacted ASC, t.executionPriority ASC, " +
-            "t.price ASC, t.datetimeInserted ASC")
+            "t.datetimeInserted ASC")
     List<Transaction> findAllOrdered();
 
 }
