@@ -1,8 +1,9 @@
 package com.portfoliowatch.controller;
 
-import com.portfoliowatch.model.Lot;
+import com.portfoliowatch.util.Lot;
 import com.portfoliowatch.model.Summary;
 import com.portfoliowatch.service.DashboardService;
+import com.portfoliowatch.util.LotList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,18 +40,4 @@ public class DashboardController {
         return new ResponseEntity<>(data, httpStatus);
     }
 
-    @GetMapping("cost-basis")
-    public ResponseEntity<Map<Long, Map<String, List<Lot>>>> getCostBasis() {
-        Map<Long, Map<String, List<Lot>>> data;
-        HttpStatus httpStatus;
-        try {
-            data = dashboardService.generateLotData();
-            httpStatus = HttpStatus.OK;
-        } catch (Exception e) {
-            data = null;
-            logger.error(e.getLocalizedMessage(), e);
-            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-        }
-        return new ResponseEntity<>(data, httpStatus);
-    }
 }

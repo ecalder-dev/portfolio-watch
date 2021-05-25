@@ -1,4 +1,4 @@
-package com.portfoliowatch.model;
+package com.portfoliowatch.util;
 
 import lombok.*;
 
