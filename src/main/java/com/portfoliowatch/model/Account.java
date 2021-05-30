@@ -1,11 +1,16 @@
 package com.portfoliowatch.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.portfoliowatch.model.dto.CostBasisDto;
+import com.portfoliowatch.util.LotList;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Getter @Setter
 @Entity @ToString
@@ -35,4 +40,7 @@ public class Account {
     @Temporal(TemporalType.TIMESTAMP)
     private Date datetimeUpdated;
 
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<CostBasisDto> costBasisList;
 }

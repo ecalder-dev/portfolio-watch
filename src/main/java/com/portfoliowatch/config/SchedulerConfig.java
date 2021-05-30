@@ -11,12 +11,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 public class SchedulerConfig {
 
     @Autowired
-    EmailService emailService;
+    private EmailService emailService;
 
     @Scheduled(cron = "0 30 16 ? * MON-FRI")
     public void weekdayJobs() {
         try {
-            emailService.sendReport("dev.edw.calderon@gmail.com");
+            //emailService.sendReport("dev.edw.calderon@gmail.com");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -25,7 +25,7 @@ public class SchedulerConfig {
     @Scheduled(cron = "0 30 15 ? * SUN")
     public void weekdayJobs1() {
         try {
-            emailService.sendReport("dev.edw.calderon@gmail.com");
+            //emailService.sendReport("dev.edw.calderon@gmail.com");
         } catch (Exception e) {
             e.printStackTrace();
         }

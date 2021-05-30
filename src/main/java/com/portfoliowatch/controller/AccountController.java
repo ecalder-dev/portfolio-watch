@@ -2,16 +2,21 @@ package com.portfoliowatch.controller;
 
 import com.portfoliowatch.model.Account;
 import com.portfoliowatch.service.AccountService;
-import com.portfoliowatch.util.LotList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
 
 @RequestMapping("/api")
 @RestController
@@ -38,11 +43,11 @@ public class AccountController {
     }
     
     @GetMapping("/accounts")
-    public ResponseEntity<List<Account>> readAllAccounts() {
+    public ResponseEntity<List<Account>> readAllAccounts(@RequestParam(required = false) boolean withDetails) {
         List<Account> data;
         HttpStatus httpStatus;
         try {
-            data = accountService.readAllAccounts();
+            data = accountService.readAllAccounts(withDetails);
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             data = null;
@@ -81,21 +86,6 @@ public class AccountController {
             httpStatus = data ? HttpStatus.OK : HttpStatus.CONFLICT;
         } catch (Exception e) {
             data = false;
-            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-            logger.error(e.getLocalizedMessage(), e);
-        }
-        return new ResponseEntity<>(data, httpStatus);
-    }
-
-    @GetMapping("/account/cost-basis")
-    public ResponseEntity<Map<Long, Map<String, LotList>>> getCostBasis() {
-        Map<Long, Map<String, LotList>> data;
-        HttpStatus httpStatus;
-        try {
-            data = accountService.generateLotData();
-            httpStatus = HttpStatus.OK;
-        } catch (Exception e) {
-            data = null;
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
             logger.error(e.getLocalizedMessage(), e);
         }

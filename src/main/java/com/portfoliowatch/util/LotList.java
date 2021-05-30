@@ -1,5 +1,7 @@
 package com.portfoliowatch.util;
 
+import lombok.Getter;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -7,37 +9,65 @@ public class LotList extends LinkedList<Lot> {
 
     private final LotComparator lotComparator;
 
+    @Getter
+    private double totalShares;
+
+    @Getter
+    private double totalPrice;
+
     public LotList() {
         super();
         lotComparator = new LotComparator();
     }
 
     public boolean add(Lot lot) {
-        if (size() == 0) {
-            return super.add(lot);
-        } if (size() == 1) {
-            if (lotComparator.compare(lot, this.get(0)) < 0) {
-                super.add(0, lot);
-                return true;
-            }
-        } else {
-            for (int i = 0; i < this.size(); i++) {
-                if (lotComparator.compare(lot, this.get(i)) < 0) {
-                    super.add(i, lot);
-                    return true;
-                } else if (i == this.size() - 1) {
-                    return super.add(lot);
-                }
-            }
+        boolean added = super.add(lot);
+        if (added) {
+            totalShares += lot.getShares();
+            totalPrice += lot.getShares() * lot.getPrice();
+            this.sort(lotComparator);
         }
-        return false;
+        return added;
     }
 
     public boolean addAll(List<Lot> lotList) {
         boolean added = super.addAll(lotList);
         if (added) {
+            lotList.forEach(l -> {
+                totalShares += l.getShares();
+                totalPrice += l.getShares() * l.getPrice();
+
+            });
             this.sort(lotComparator);
         }
         return added;
+    }
+
+    public Lot peak() {
+        if (this.size() == 0) {
+            return null;
+        } else {
+            return this.get(0);
+        }
+    }
+
+    public boolean remove(Lot lot) {
+        boolean removed = super.remove(lot);
+        if (removed) {
+            totalShares -= lot.getShares();
+            totalPrice -= lot.getPrice() * lot.getShares();
+        }
+        return removed;
+    }
+
+    public boolean removeAll(List<Lot> lotList) {
+        boolean removed = super.removeAll(lotList);
+        if (removed) {
+            lotList.forEach(l -> {
+                totalShares -= l.getShares();
+                totalPrice -= l.getShares() * l.getPrice();
+            });
+        }
+        return removed;
     }
 }

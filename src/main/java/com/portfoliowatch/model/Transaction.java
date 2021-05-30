@@ -29,6 +29,12 @@ public class Transaction {
     @Column(name = "price")
     private Double price;
 
+    @Column(length = 10)
+    private String ratio;
+
+    @Column(name = "new_symbol", length = 5)
+    private String newSymbol;
+
     @Column(name = "execution_priority")
     private Integer executionPriority;
 
