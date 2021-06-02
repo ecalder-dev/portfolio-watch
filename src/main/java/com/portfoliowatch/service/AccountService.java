@@ -44,10 +44,11 @@ public class AccountService {
 
     public List<Account> readAllAccounts(boolean withDetails) {
         List<Account> accounts = accountRepository.findAll();
-        for (Account account: accounts) {
-            this.insertCostBasisInfo(account);
+        if (withDetails) {
+            for (Account account: accounts) {
+                this.insertCostBasisInfo(account);
+            }
         }
-
         return accounts;
     }
 
