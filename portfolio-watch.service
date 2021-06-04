@@ -4,6 +4,15 @@ After=syslog.target
 
 [Service]
 User=root
+Environment=TD_ACCT_ID=
+Environment=DB_URL=
+Environment=EMAIL_USER=
+Environment=EMAIL_PASS=
+Environment=KEY_STORE_LOC=
+Environment=KEY_STORE_PASS=
+Environment=TD_REDIRECT=
+Environment=TD_CLIENT_ID=
+Environment=FMP_API_KEY=
 ExecStart=/usr/bin/java -jar -Dtd-ameritrade.account-id=${TD_ACCT_ID} -Dspring.datasource.url=${DB_URL} -Dspring.mail.username=${EMAIL_USER} -Dspring.mail.password=${EMAIL_PASS} -Dserver.ssl.key-store=${KEY_STORE_LOC} -Dserver.ssl.key-store-password=${KEY_STORE_PASS} -Dtd-ameritrade.redirect=${TD_REDIRECT} -Dtd-ameritrade.client-id=${TD_CLIENT_ID} -Dfinancial-modeling-prep.api-key=${FMP_API_KEY} /home/pi/Projects/portfolio-watch/target/portfolio-watch-0.0.1-SNAPSHOT.jar
 SuccessExitStatus=143
 
