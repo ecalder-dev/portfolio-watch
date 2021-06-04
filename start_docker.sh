@@ -1,6 +1,6 @@
 #!/bin/bash
 docker build -t portfolio-watch .
-docker run -dp 9200:9200 --name portfolio-watch-container \
+docker run -dp 9200:9200 --network="host" --name portfolio-watch-container \
 --env DB_URL=$DB_URL --env TD_ACCT_ID=$TD_ACCT_ID \
 --env EMAIL_USER=$EMAIL_USER --env EMAIL_PASS=$EMAIL_PASS \
 --env KEY_STORE_LOC=$KEY_STORE_LOC --env KEY_STORE_LOC=$KEY_STORE_LOC \
