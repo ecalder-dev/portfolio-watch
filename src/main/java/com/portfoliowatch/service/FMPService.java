@@ -18,6 +18,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class FMPService {
@@ -30,7 +31,7 @@ public class FMPService {
     private final Type fmpProfileListType = new TypeToken<ArrayList<FMPProfile>>(){}.getType();
 
 
-    public List<FMPProfile> getCompanyProfile(List<String> symbols) throws URISyntaxException, IOException {
+    public List<FMPProfile> getCompanyProfile(Set<String> symbols) throws URISyntaxException, IOException {
         List<FMPProfile> profiles = new ArrayList<>();
         if (symbols == null || symbols.isEmpty()) {
             return profiles;

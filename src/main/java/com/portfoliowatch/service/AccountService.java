@@ -7,6 +7,8 @@ import com.portfoliowatch.repository.AccountRepository;
 import com.portfoliowatch.repository.TransactionRepository;
 import com.portfoliowatch.util.Lot;
 import com.portfoliowatch.util.LotList;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.math3.util.Precision;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +35,7 @@ public class AccountService {
 
     private Map<Long, Map<String, LotList>> costBasisMap = null;
 
-    private Map<String, List<Lot>> transferMap = null;
+    private final Map<String, List<Lot>> transferMap = new TreeMap<>();
 
     public Account createAccount(Account account) {
         account.setAccountId(null);
@@ -85,9 +87,13 @@ public class AccountService {
         account.setCostBasisList(costBasisDtoList);
     }
 
-    private void regenerateCostBasisMap() {
-        costBasisMap = new TreeMap<>();
-        transferMap = new TreeMap<>();
+    public void regenerateCostBasisMap() {
+        if (costBasisMap != null) {
+            costBasisMap.clear();
+        } else {
+            costBasisMap = new TreeMap<>();
+        }
+        transferMap.clear();
         List<Transaction> transactionList = transactionRepository.findAllOrdered();
         for (Transaction transaction : transactionList) {
             switch (transaction.getType().toUpperCase()) {
@@ -324,4 +330,10 @@ public class AccountService {
         }
     }
 
+    public Map<Long, Map<String, LotList>> getCostBasisMap() {
+        if (this.costBasisMap == null) {
+            this.regenerateCostBasisMap();
+        }
+        return costBasisMap;
+    }
 }

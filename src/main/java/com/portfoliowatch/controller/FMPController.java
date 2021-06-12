@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RequestMapping("/fmp")
@@ -26,7 +27,7 @@ public class FMPController {
     FMPService fmpService;
 
     @GetMapping("profiles")
-    public ResponseEntity<List<FMPProfile>> getProfiles(@RequestParam List<String> symbols) {
+    public ResponseEntity<List<FMPProfile>> getProfiles(@RequestParam Set<String> symbols) {
         List<FMPProfile> data;
         HttpStatus httpStatus;
         try {

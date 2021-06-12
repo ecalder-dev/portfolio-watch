@@ -1,5 +1,6 @@
 package com.portfoliowatch.model;
 
+import com.portfoliowatch.model.dto.CostBasisDto;
 import com.portfoliowatch.model.financialmodelingprep.FMPProfile;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,11 +22,11 @@ public class Summary {
     private String sector;
     private Boolean isEtf;
 
-    public Summary(Position position, FMPProfile fmpProfile) {
-        if (position != null) {
-            this.symbol = position.getSymbol();
-            this.shares = position.getShares();
-            this.costBasis = position.getCostBasis();
+    public Summary(CostBasisDto costBasisDto, FMPProfile fmpProfile) {
+        if (costBasisDto != null) {
+            this.symbol = costBasisDto.getSymbol();
+            this.shares = costBasisDto.getTotalShares();
+            this.costBasis = costBasisDto.getAdjustedPrice();
         }
         if (fmpProfile != null) {
             this.currentPrice = fmpProfile.getPrice();

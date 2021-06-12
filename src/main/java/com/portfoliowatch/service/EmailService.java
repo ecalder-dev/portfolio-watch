@@ -55,7 +55,7 @@ public class EmailService {
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
         helper.setTo(to);
         List<TDAmeriPosition> positions = tdAmeritradeService.getTDAccountPositions();
-        List<String> tickers = new ArrayList<>();
+        Set<String> tickers = new HashSet<>();
         for (TDAmeriPosition p : positions) {
             String symbol = p.getInstrument().getSymbol();
             tickers.add(symbol);
