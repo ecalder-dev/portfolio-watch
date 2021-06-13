@@ -1,7 +1,9 @@
 package com.portfoliowatch.service;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.portfoliowatch.model.financialmodelingprep.FMPNews;
 import com.portfoliowatch.model.financialmodelingprep.FMPProfile;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -17,6 +19,9 @@ import java.lang.reflect.Type;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Set;
 
@@ -26,10 +31,15 @@ public class FMPService {
     @Value("${financial-modeling-prep.api-key}")
     private String apiKey;
 
-    private final Gson gson = new Gson();
+    private final Gson gson;
 
     private final Type fmpProfileListType = new TypeToken<ArrayList<FMPProfile>>(){}.getType();
 
+    private final Type fmpNewsListType = new TypeToken<ArrayList<FMPNews>>(){}.getType();
+
+    public FMPService() {
+        gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+    }
 
     public List<FMPProfile> getCompanyProfile(Set<String> symbols) throws URISyntaxException, IOException {
         List<FMPProfile> profiles = new ArrayList<>();
@@ -49,5 +59,39 @@ public class FMPService {
         }
 
         return profiles;
+    }
+
+    public List<FMPNews> getNews(Set<String> symbols, int daysBefore) throws URISyntaxException, IOException {
+        List<FMPNews> newsList = new ArrayList<>();
+        String FMP_URL = "https://financialmodelingprep.com/api/v3/stock_news";
+        Date startDate = this.subtractDays(new Date(), daysBefore);
+
+        for (String symbol: symbols) {
+            URIBuilder builder = new URIBuilder(FMP_URL);
+            builder.addParameter("tickers", symbol);
+            builder.addParameter("apikey", apiKey);
+            HttpGet get = new HttpGet(builder.build());
+            try (CloseableHttpClient httpclient = HttpClients.custom().build()) {
+                try (CloseableHttpResponse response = httpclient.execute(get)) {
+                    String responseStr = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8.name());
+                    List<FMPNews> fmpNews = gson.fromJson(responseStr, fmpNewsListType);
+                    for (FMPNews news: fmpNews) {
+                        if (startDate.before(news.getPublishedDate())) {
+                            newsList.add(news);
+                        }
+                    }
+                }
+            }
+        }
+
+        return newsList;
+    }
+
+    private Date subtractDays(Date date, int days) {
+        GregorianCalendar cal = new GregorianCalendar();
+        cal.setTime(date);
+        cal.add(Calendar.DATE, -days);
+
+        return cal.getTime();
     }
 }

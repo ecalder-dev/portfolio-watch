@@ -1,5 +1,6 @@
 package com.portfoliowatch.controller;
 
+import com.portfoliowatch.model.financialmodelingprep.FMPNews;
 import com.portfoliowatch.util.Lot;
 import com.portfoliowatch.model.Summary;
 import com.portfoliowatch.service.DashboardService;
@@ -11,10 +12,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RequestMapping("/api/dashboard")
 @RestController
@@ -31,6 +34,21 @@ public class DashboardController {
         HttpStatus httpStatus;
         try {
             data = dashboardService.getSummaryList();
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            data = null;
+            logger.error(e.getLocalizedMessage(), e);
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+        return new ResponseEntity<>(data, httpStatus);
+    }
+
+    @GetMapping("news")
+    public ResponseEntity<List<FMPNews>> getNews() {
+        List<FMPNews> data;
+        HttpStatus httpStatus;
+        try {
+            data = dashboardService.getPositionNews();
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             data = null;

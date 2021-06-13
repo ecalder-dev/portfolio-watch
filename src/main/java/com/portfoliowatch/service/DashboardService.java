@@ -4,6 +4,7 @@ import com.portfoliowatch.model.Account;
 import com.portfoliowatch.model.Position;
 import com.portfoliowatch.model.Summary;
 import com.portfoliowatch.model.dto.CostBasisDto;
+import com.portfoliowatch.model.financialmodelingprep.FMPNews;
 import com.portfoliowatch.model.financialmodelingprep.FMPProfile;
 import com.portfoliowatch.util.LotList;
 import org.apache.commons.math3.analysis.function.Cos;
@@ -14,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.net.CookieStore;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class DashboardService {
@@ -52,25 +51,18 @@ public class DashboardService {
         return summaries;
     }
 
-    public void generateCostBasisMap() {
-        costBasisMap.clear();
-        List<Account> accountList = accountService.readAllAccounts(true);
-        for (Account account: accountList) {
-            for (CostBasisDto costBasisDto: account.getCostBasisList()) {
-                if (costBasisMap.containsKey(costBasisDto.getSymbol())){
-                    CostBasisDto contained = costBasisMap.get(costBasisDto.getSymbol());
-                    double total1 = contained.getTotalShares();
-                    double total2 = costBasisDto.getTotalShares();
-                    double price1 = contained.getAdjustedPrice();
-                    double price2 = costBasisDto.getAdjustedPrice();
-                    double newPrice = (price1 * total1 + price2 * total2) / (total1 + total2);
-                    costBasisDto.setTotalShares(Precision.round(total1 + total2, 2));
-                    costBasisDto.setAdjustedPrice(Precision.round(newPrice, 4));
-                } else {
-                    costBasisMap.put(costBasisDto.getSymbol(), costBasisDto);
-                }
-            }
+    public List<FMPNews> getPositionNews() throws IOException, URISyntaxException {
+        Map<Long, Map<String, LotList>> costBasisMap = accountService.getCostBasisMap();
+        Set<String> symbols = new HashSet<>();
+        for (Map.Entry<Long,
+                Map<String, LotList>> keypair: costBasisMap.entrySet()) {
+            symbols.addAll(keypair.getValue().keySet());
         }
+        return this.fmpService.getNews(symbols, 3);
+    }
+
+    public void generateCostBasisMap() {
+
     }
 
 }
