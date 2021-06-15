@@ -1,10 +1,12 @@
 package com.portfoliowatch.service;
 
+import com.portfoliowatch.model.Account;
 import com.portfoliowatch.model.Summary;
 import com.portfoliowatch.model.dto.CostBasisDto;
 import com.portfoliowatch.model.financialmodelingprep.FMPNews;
 import com.portfoliowatch.model.financialmodelingprep.FMPProfile;
 import com.portfoliowatch.util.LotList;
+import org.apache.commons.math3.util.Precision;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,7 @@ public class DashboardService {
 
     public List<Summary> getSummaryList() throws IOException, URISyntaxException {
         List<Summary> summaries = new ArrayList<>();
+        this.generateCostBasisMap();
         List<FMPProfile> fmpProfiles = fmpService.getCompanyProfile(costBasisMap.keySet());
         for (Map.Entry<String, CostBasisDto> keypair: costBasisMap.entrySet()) {
             Optional<FMPProfile> fmpProfileOptional = fmpProfiles.stream()
@@ -54,6 +57,28 @@ public class DashboardService {
             symbols.addAll(keypair.getValue().keySet());
         }
         return this.fmpService.getNews(symbols, 3);
+    }
+
+    public void generateCostBasisMap() {
+        costBasisMap.clear();
+        accountService.getCostBasisMap();
+        List<Account> accountList = accountService.readAllAccounts(true);
+        for (Account account: accountList) {
+            for (CostBasisDto costBasisDto: account.getCostBasisList()) {
+                if (costBasisMap.containsKey(costBasisDto.getSymbol())){
+                    CostBasisDto contained = costBasisMap.get(costBasisDto.getSymbol());
+                    double total1 = contained.getTotalShares();
+                    double total2 = costBasisDto.getTotalShares();
+                    double price1 = contained.getAdjustedPrice();
+                    double price2 = costBasisDto.getAdjustedPrice();
+                    double newPrice = (price1 * total1 + price2 * total2) / (total1 + total2);
+                    costBasisDto.setTotalShares(Precision.round(total1 + total2, 2));
+                    costBasisDto.setAdjustedPrice(Precision.round(newPrice, 4));
+                } else {
+                    costBasisMap.put(costBasisDto.getSymbol(), costBasisDto);
+                }
+            }
+        }
     }
 
 }
