@@ -1,14 +1,10 @@
 package com.portfoliowatch.service;
 
-import com.portfoliowatch.model.Account;
-import com.portfoliowatch.model.Position;
 import com.portfoliowatch.model.Summary;
 import com.portfoliowatch.model.dto.CostBasisDto;
 import com.portfoliowatch.model.financialmodelingprep.FMPNews;
 import com.portfoliowatch.model.financialmodelingprep.FMPProfile;
 import com.portfoliowatch.util.LotList;
-import org.apache.commons.math3.analysis.function.Cos;
-import org.apache.commons.math3.util.Precision;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +35,6 @@ public class DashboardService {
 
     public List<Summary> getSummaryList() throws IOException, URISyntaxException {
         List<Summary> summaries = new ArrayList<>();
-        this.generateCostBasisMap();
         List<FMPProfile> fmpProfiles = fmpService.getCompanyProfile(costBasisMap.keySet());
         for (Map.Entry<String, CostBasisDto> keypair: costBasisMap.entrySet()) {
             Optional<FMPProfile> fmpProfileOptional = fmpProfiles.stream()
@@ -59,10 +54,6 @@ public class DashboardService {
             symbols.addAll(keypair.getValue().keySet());
         }
         return this.fmpService.getNews(symbols, 3);
-    }
-
-    public void generateCostBasisMap() {
-
     }
 
 }
