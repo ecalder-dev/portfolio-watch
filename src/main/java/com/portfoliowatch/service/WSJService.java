@@ -30,7 +30,7 @@ public class WSJService {
         id.setApplication("WSJ");
         id.addInstrument("INDEX/US//DJIA", "Industrial Average");
         id.addInstrument("INDEX/US//SPX", "500 Index");
-        id.addInstrument("INDEX/US//NDX", "Nasdaq 100");
+        id.addInstrument("INDEX/US//COMP", "Composite");
         id.addInstrument("INDEX/US//RUT", "Russell 2000");
         id.setExpanded(true);
         id.setRefreshInterval(60000);
