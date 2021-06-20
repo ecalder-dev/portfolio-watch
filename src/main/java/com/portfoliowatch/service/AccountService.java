@@ -7,8 +7,6 @@ import com.portfoliowatch.repository.AccountRepository;
 import com.portfoliowatch.repository.TransactionRepository;
 import com.portfoliowatch.util.Lot;
 import com.portfoliowatch.util.LotList;
-import lombok.Getter;
-import lombok.Setter;
 import org.apache.commons.math3.util.Precision;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

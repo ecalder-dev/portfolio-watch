@@ -49,19 +49,8 @@ public class DashboardService {
         return summaries;
     }
 
-    public List<FMPNews> getPositionNews() throws IOException, URISyntaxException {
-        Map<Long, Map<String, LotList>> costBasisMap = accountService.getCostBasisMap();
-        Set<String> symbols = new HashSet<>();
-        for (Map.Entry<Long,
-                Map<String, LotList>> keypair: costBasisMap.entrySet()) {
-            symbols.addAll(keypair.getValue().keySet());
-        }
-        return this.fmpService.getNews(symbols, 3);
-    }
-
     public void generateCostBasisMap() {
         costBasisMap.clear();
-        accountService.getCostBasisMap();
         List<Account> accountList = accountService.readAllAccounts(true);
         for (Account account: accountList) {
             for (CostBasisDto costBasisDto: account.getCostBasisList()) {

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RequestMapping("/api/dashboard")
@@ -28,27 +29,13 @@ public class DashboardController {
     @Autowired
     private WSJService WSJService;
 
+
     @GetMapping("summaries")
     public ResponseEntity<List<Summary>> getSummaries() {
         List<Summary> data;
         HttpStatus httpStatus;
         try {
             data = dashboardService.getSummaryList();
-            httpStatus = HttpStatus.OK;
-        } catch (Exception e) {
-            data = null;
-            logger.error(e.getLocalizedMessage(), e);
-            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-        }
-        return new ResponseEntity<>(data, httpStatus);
-    }
-
-    @GetMapping("news")
-    public ResponseEntity<List<FMPNews>> getNews() {
-        List<FMPNews> data;
-        HttpStatus httpStatus;
-        try {
-            data = dashboardService.getPositionNews();
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             data = null;

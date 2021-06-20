@@ -37,6 +37,12 @@ public class FMPService {
 
     private final Type fmpNewsListType = new TypeToken<ArrayList<FMPNews>>(){}.getType();
 
+    private Date lastNewsPull;
+
+    private List<FMPNews> cachedNews;
+
+    private final long cacheRefreshRate = 21600000; //6 hours
+
     public FMPService() {
         gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
     }
@@ -62,9 +68,20 @@ public class FMPService {
     }
 
     public List<FMPNews> getNews(Set<String> symbols, int daysBefore) throws URISyntaxException, IOException {
-        List<FMPNews> newsList = new ArrayList<>();
         String FMP_URL = "https://financialmodelingprep.com/api/v3/stock_news";
-        Date startDate = this.subtractDays(new Date(), daysBefore);
+        Date nowDate = new Date();
+        Date startDate = this.subtractDays(nowDate, daysBefore);
+
+        if (lastNewsPull != null && cachedNews != null
+                && nowDate.getTime() - lastNewsPull.getTime() < cacheRefreshRate) {
+            return cachedNews;
+        }
+
+        if (cachedNews == null) {
+            cachedNews = new ArrayList<>();
+        } else {
+            cachedNews.clear();
+        }
 
         for (String symbol: symbols) {
             URIBuilder builder = new URIBuilder(FMP_URL);
@@ -77,14 +94,16 @@ public class FMPService {
                     List<FMPNews> fmpNews = gson.fromJson(responseStr, fmpNewsListType);
                     for (FMPNews news: fmpNews) {
                         if (startDate.before(news.getPublishedDate())) {
-                            newsList.add(news);
+                            cachedNews.add(news);
                         }
                     }
                 }
             }
         }
 
-        return newsList;
+        lastNewsPull = nowDate;
+
+        return cachedNews;
     }
 
     private Date subtractDays(Date date, int days) {

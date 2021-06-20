@@ -14,13 +14,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@RequestMapping("/fmp")
+@RequestMapping("/api/fmp")
 @RestController
 public class FMPController {
 
@@ -45,7 +46,8 @@ public class FMPController {
     }
 
     @GetMapping("news")
-    public ResponseEntity<List<FMPNews>> getNews(@RequestParam Set<String> symbols, @RequestParam int daysBefore) {
+    public ResponseEntity<List<FMPNews>> getNews(@RequestParam Set<String> symbols,
+                                                 @RequestParam(required = false, defaultValue = "3") int daysBefore) {
         List<FMPNews> data;
         HttpStatus httpStatus;
         try {
