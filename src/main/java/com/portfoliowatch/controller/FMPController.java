@@ -46,12 +46,11 @@ public class FMPController {
     }
 
     @GetMapping("news")
-    public ResponseEntity<List<FMPNews>> getNews(@RequestParam Set<String> symbols,
-                                                 @RequestParam(required = false, defaultValue = "3") int daysBefore) {
+    public ResponseEntity<List<FMPNews>> getNews(@RequestParam Set<String> symbols) {
         List<FMPNews> data;
         HttpStatus httpStatus;
         try {
-            data = fmpService.getNews(symbols, daysBefore);
+            data = fmpService.getNews(symbols);
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             data = null;

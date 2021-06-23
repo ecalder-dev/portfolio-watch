@@ -67,10 +67,9 @@ public class FMPService {
         return profiles;
     }
 
-    public List<FMPNews> getNews(Set<String> symbols, int daysBefore) throws URISyntaxException, IOException {
+    public List<FMPNews> getNews(Set<String> symbols) throws URISyntaxException, IOException {
         String FMP_URL = "https://financialmodelingprep.com/api/v3/stock_news";
         Date nowDate = new Date();
-        Date startDate = this.subtractDays(nowDate, daysBefore);
 
         if (lastNewsPull != null && cachedNews != null
                 && nowDate.getTime() - lastNewsPull.getTime() < cacheRefreshRate) {
@@ -93,24 +92,22 @@ public class FMPService {
                     String responseStr = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8.name());
                     List<FMPNews> fmpNews = gson.fromJson(responseStr, fmpNewsListType);
                     for (FMPNews news: fmpNews) {
-                        if (startDate.before(news.getPublishedDate())) {
+                        FMPNews exist = cachedNews.stream().filter(n ->
+                                n.getPublishedDate().equals(news.getPublishedDate()) &&
+                                        n.getTitle().equals(news.getTitle())
+                        ).findFirst().orElse(null);
+                        if (exist != null) {
+                            exist.getMentionedSymbols().add(symbol);
+                        } else {
+                            news.getMentionedSymbols().add(symbol);
                             cachedNews.add(news);
                         }
                     }
                 }
             }
         }
-
         lastNewsPull = nowDate;
-
         return cachedNews;
     }
 
-    private Date subtractDays(Date date, int days) {
-        GregorianCalendar cal = new GregorianCalendar();
-        cal.setTime(date);
-        cal.add(Calendar.DATE, -days);
-
-        return cal.getTime();
-    }
 }
