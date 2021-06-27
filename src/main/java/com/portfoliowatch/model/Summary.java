@@ -11,8 +11,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Summary {
     private String symbol;
-    private Double shares;
-    private Double costBasis;
     private Double currentPrice;
     private Long averageVolume;
     private Double dollarChange;
@@ -22,13 +20,9 @@ public class Summary {
     private String sector;
     private Boolean isEtf;
 
-    public Summary(CostBasisDto costBasisDto, FMPProfile fmpProfile) {
-        if (costBasisDto != null) {
-            this.symbol = costBasisDto.getSymbol();
-            this.shares = costBasisDto.getTotalShares();
-            this.costBasis = costBasisDto.getAdjustedPrice();
-        }
+    public Summary(FMPProfile fmpProfile) {
         if (fmpProfile != null) {
+            this.symbol = fmpProfile.getSymbol();
             this.currentPrice = fmpProfile.getPrice();
             this.averageVolume = fmpProfile.getVolAvg();
             this.dollarChange = fmpProfile.getChanges();

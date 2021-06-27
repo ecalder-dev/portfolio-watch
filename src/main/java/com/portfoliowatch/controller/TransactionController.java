@@ -2,12 +2,14 @@ package com.portfoliowatch.controller;
 
 import com.portfoliowatch.model.Transaction;
 import com.portfoliowatch.service.TransactionService;
+import com.portfoliowatch.util.Lot;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RequestMapping("/api")
 @RestController
@@ -88,5 +90,11 @@ public class TransactionController {
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         }
         return new ResponseEntity<>(data, httpStatus);
+    }
+
+    @GetMapping("/transaction/cost-basis")
+    public ResponseEntity<Map<String, Lot>> getSymbolAggregatedCostBasisMap() {
+        Map<String, Lot> data = transactionService.getSymbolAggregatedCostBasisMap();
+        return new ResponseEntity<>(data, HttpStatus.OK);
     }
 }
