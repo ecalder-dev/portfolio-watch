@@ -1,7 +1,6 @@
 package com.portfoliowatch.service;
 
 import com.portfoliowatch.model.Transaction;
-import com.portfoliowatch.model.dto.CostBasisDto;
 import com.portfoliowatch.repository.TransactionRepository;
 import com.portfoliowatch.util.Lot;
 import com.portfoliowatch.util.LotList;
@@ -303,6 +302,7 @@ public class TransactionService {
      */
     public void generateAccountLotListMap() {
         logger.info("Generating new cost basis map.");
+        accountLotListMap.clear();
         transferMap.clear();
         equityOwned.clear();
         List<Transaction> transactionList = transactionRepository.findAllOrdered();
