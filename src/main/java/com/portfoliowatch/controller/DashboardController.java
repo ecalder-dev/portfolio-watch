@@ -1,10 +1,9 @@
 package com.portfoliowatch.controller;
 
-import com.portfoliowatch.model.financialmodelingprep.FMPNews;
 import com.portfoliowatch.model.wsj.WSJInstrument;
 import com.portfoliowatch.service.WSJService;
 import com.portfoliowatch.model.Summary;
-import com.portfoliowatch.service.DashboardService;
+import com.portfoliowatch.service.PortfolioStatsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +13,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RequestMapping("/api/dashboard")
 @RestController
@@ -24,7 +24,7 @@ public class DashboardController {
     private static final Logger logger = LoggerFactory.getLogger(DashboardController.class);
 
     @Autowired
-    private DashboardService dashboardService;
+    private PortfolioStatsService portfolioStatsService;
 
     @Autowired
     private WSJService WSJService;
@@ -35,7 +35,22 @@ public class DashboardController {
         List<Summary> data;
         HttpStatus httpStatus;
         try {
-            data = dashboardService.getSummaryList();
+            data = portfolioStatsService.getSummaryList();
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            data = null;
+            logger.error(e.getLocalizedMessage(), e);
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+        return new ResponseEntity<>(data, httpStatus);
+    }
+
+    @GetMapping("sector-spread")
+    public ResponseEntity<Map<String, BigDecimal>> getSectorSpread() {
+        Map<String, BigDecimal> data;
+        HttpStatus httpStatus;
+        try {
+            data = portfolioStatsService.getSectorSpread();
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             data = null;
