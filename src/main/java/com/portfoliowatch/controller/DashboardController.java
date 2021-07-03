@@ -2,7 +2,7 @@ package com.portfoliowatch.controller;
 
 import com.portfoliowatch.model.wsj.WSJInstrument;
 import com.portfoliowatch.service.WSJService;
-import com.portfoliowatch.model.Summary;
+import com.portfoliowatch.model.dto.QuoteDto;
 import com.portfoliowatch.service.PortfolioStatsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,11 +11,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RequestMapping("/api/dashboard")
 @RestController
@@ -29,13 +31,12 @@ public class DashboardController {
     @Autowired
     private WSJService WSJService;
 
-
-    @GetMapping("summaries")
-    public ResponseEntity<List<Summary>> getSummaries() {
-        List<Summary> data;
+    @GetMapping("quotes")
+    public ResponseEntity<List<QuoteDto>> getQuoteList() {
+        List<QuoteDto> data;
         HttpStatus httpStatus;
         try {
-            data = portfolioStatsService.getSummaryList();
+            data = portfolioStatsService.getQuoteList();
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             data = null;

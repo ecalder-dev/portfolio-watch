@@ -1,6 +1,6 @@
 package com.portfoliowatch.service;
 
-import com.portfoliowatch.model.Summary;
+import com.portfoliowatch.model.dto.QuoteDto;
 import com.portfoliowatch.model.financialmodelingprep.FMPProfile;
 import com.portfoliowatch.util.Lot;
 import org.slf4j.Logger;
@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 public class PortfolioStatsService {
@@ -30,7 +31,7 @@ public class PortfolioStatsService {
 
     private Date lastSummaryUpdate;
 
-    private final List<Summary> cachedSummaries;
+    private final List<QuoteDto> cachedSummaries;
 
     public PortfolioStatsService() {
         lastSummaryUpdate = null;
@@ -41,7 +42,7 @@ public class PortfolioStatsService {
      * Gets a list of Summaries.
      * @return A Lsit of Summaries
      */
-    public List<Summary> getSummaryList() throws IOException, URISyntaxException {
+    public List<QuoteDto> getQuoteList() throws IOException, URISyntaxException {
         Date nowDate = new Date();
 
         //10 minutes
@@ -52,10 +53,11 @@ public class PortfolioStatsService {
 
         logger.info("Getting new summary list.");
         cachedSummaries.clear();
-        List<FMPProfile> fmpProfiles = fmpService.getCompanyProfile(transactionService.getEquityOwned());
-        Map<String, Lot> symbolLotMap = transactionService.getSymbolAggregatedCostBasisMap();
+
+        Set<String> symbols = transactionService.getEquityOwned();
+        List<FMPProfile> fmpProfiles = fmpService.getCompanyProfile(symbols);
         for (FMPProfile profile: fmpProfiles) {
-            cachedSummaries.add(new Summary(profile, symbolLotMap.get(profile.getSymbol())));
+            cachedSummaries.add(new QuoteDto(profile));
         }
         lastSummaryUpdate = nowDate;
         return cachedSummaries;
@@ -66,15 +68,21 @@ public class PortfolioStatsService {
      * @return A map with string keys and double values.
      */
     public Map<String, BigDecimal> getSectorSpread() throws IOException, URISyntaxException {
-        List<Summary> summaries = this.getSummaryList();
+        List<QuoteDto> quoteList = this.getQuoteList();
+        Map<String, Lot> symbolLotMap = transactionService.getSymbolAggregatedCostBasisMap();
+
         Map<String, BigDecimal> sectorSplitMap = new HashMap<>();
         BigDecimal totalPrice = new BigDecimal("0.0");
-        for (Summary summary: summaries) {
-            totalPrice = totalPrice.add(new BigDecimal(summary.getCurrentPrice() + ""));
-            BigDecimal currentPrice = sectorSplitMap.get(summary.getSector());
-            currentPrice = currentPrice == null ? new BigDecimal("0.0") : currentPrice;
-            currentPrice = currentPrice.add(new BigDecimal(summary.getCurrentPrice() + ""));
-            sectorSplitMap.put(summary.getSector(), currentPrice);
+        for (QuoteDto quote: quoteList) {
+            Lot lot = symbolLotMap.get(quote.getSymbol());
+            BigDecimal totalShares = new BigDecimal(lot.getShares() + "");
+            BigDecimal currentPrice = new BigDecimal(quote.getCurrentPrice() + "");
+
+            totalPrice = totalPrice.add(currentPrice.multiply(totalShares));
+            BigDecimal newPrice = sectorSplitMap.get(quote.getSector());
+            newPrice = newPrice == null ? new BigDecimal("0.0") : newPrice;
+            newPrice = newPrice.add(currentPrice.multiply(totalShares));
+            sectorSplitMap.put(quote.getSector(), newPrice);
         }
 
         for (Map.Entry<String, BigDecimal> keypair: sectorSplitMap.entrySet()){
