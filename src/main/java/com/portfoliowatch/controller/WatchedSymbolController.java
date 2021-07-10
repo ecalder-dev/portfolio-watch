@@ -11,7 +11,7 @@ import java.util.List;
 
 @RequestMapping("/api")
 @RestController
-public class WatchedController {
+public class WatchedSymbolController {
 
     @Autowired
     WatchedSymbolService watchedSymbolService;
@@ -31,11 +31,11 @@ public class WatchedController {
     }
 
     @PostMapping("/watching")
-    public ResponseEntity<WatchedSymbol> postWatching(@RequestBody WatchedSymbol watchedSymbol) {
+    public ResponseEntity<WatchedSymbol> postWatching(@RequestParam String symbol) {
         WatchedSymbol data;
         HttpStatus httpStatus;
         try {
-            data = watchedSymbolService.createWatchedSymbol(watchedSymbol);
+            data = watchedSymbolService.createWatchedSymbol(symbol);
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             data = null;
@@ -46,11 +46,11 @@ public class WatchedController {
 
 
     @DeleteMapping("/watching")
-    public ResponseEntity<Boolean> deleteWatching(@RequestBody WatchedSymbol watchedSymbol) {
+    public ResponseEntity<Boolean> deleteWatching(@RequestParam String symbol) {
         boolean data;
         HttpStatus httpStatus;
         try {
-            data = watchedSymbolService.deleteWatchedSymbol(watchedSymbol);
+            data = watchedSymbolService.deleteWatchedSymbol(symbol);
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             data = false;
