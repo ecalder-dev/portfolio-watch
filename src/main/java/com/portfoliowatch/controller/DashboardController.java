@@ -4,6 +4,7 @@ import com.portfoliowatch.model.wsj.WSJInstrument;
 import com.portfoliowatch.service.WSJService;
 import com.portfoliowatch.model.dto.QuoteDto;
 import com.portfoliowatch.service.PortfolioStatsService;
+import com.portfoliowatch.service.WatchedSymbolService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

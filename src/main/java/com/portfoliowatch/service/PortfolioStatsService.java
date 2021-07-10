@@ -1,5 +1,6 @@
 package com.portfoliowatch.service;
 
+import com.portfoliowatch.model.WatchedSymbol;
 import com.portfoliowatch.model.dto.QuoteDto;
 import com.portfoliowatch.model.financialmodelingprep.FMPProfile;
 import com.portfoliowatch.util.Lot;
@@ -17,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class PortfolioStatsService {
@@ -28,6 +30,9 @@ public class PortfolioStatsService {
 
     @Autowired
     private TransactionService transactionService;
+
+    @Autowired
+    private WatchedSymbolService watchedSymbolService;
 
     private Date lastSummaryUpdate;
 
@@ -45,19 +50,22 @@ public class PortfolioStatsService {
     public List<QuoteDto> getQuoteList() throws IOException, URISyntaxException {
         Date nowDate = new Date();
 
-        //10 minutes
-        long cacheRefreshRate = 600000;
+        //5 minutes
+        long cacheRefreshRate = 300000;
         if (lastSummaryUpdate != null && nowDate.getTime() - lastSummaryUpdate.getTime() < cacheRefreshRate) {
             return cachedSummaries;
         }
 
-        logger.info("Getting new summary list.");
+        logger.info("Generated new quote list.");
         cachedSummaries.clear();
 
-        Set<String> symbols = transactionService.getEquityOwned();
-        List<FMPProfile> fmpProfiles = fmpService.getCompanyProfile(symbols);
+        List<WatchedSymbol> watchedSymbols = watchedSymbolService.getAllWatchedSymbols();
+        Set<String> symbols = watchedSymbols.stream().map(WatchedSymbol::getSymbol).collect(Collectors.toSet());
+        Set<String> equityOwned = transactionService.getEquityOwned();
+        symbols.addAll(equityOwned);
+        List<FMPProfile> fmpProfiles = fmpService.getCompanyProfiles(symbols);
         for (FMPProfile profile: fmpProfiles) {
-            cachedSummaries.add(new QuoteDto(profile));
+            cachedSummaries.add(new QuoteDto(profile, equityOwned.contains(profile.getSymbol())));
         }
         lastSummaryUpdate = nowDate;
         return cachedSummaries;

@@ -13,13 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @RequestMapping("/api/fmp")
 @RestController
@@ -35,7 +30,7 @@ public class FMPController {
         List<FMPProfile> data;
         HttpStatus httpStatus;
         try {
-            data = fmpService.getCompanyProfile(symbols);
+            data = fmpService.getCompanyProfiles(symbols);
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             data = null;

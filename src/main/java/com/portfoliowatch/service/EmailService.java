@@ -60,7 +60,7 @@ public class EmailService {
             String symbol = p.getInstrument().getSymbol();
             tickers.add(symbol);
         }
-        List<FMPProfile> profiles = fmpService.getCompanyProfile(tickers);
+        List<FMPProfile> profiles = fmpService.getCompanyProfiles(tickers);
 
         result = result.replace("[first_name]", "there");
         result = result.replace("[stock_table]", createStockTable(positions, profiles));

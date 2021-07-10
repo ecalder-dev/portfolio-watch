@@ -47,7 +47,7 @@ public class FMPService {
         gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
     }
 
-    public List<FMPProfile> getCompanyProfile(Set<String> symbols) throws URISyntaxException, IOException {
+    public List<FMPProfile> getCompanyProfiles(Set<String> symbols) throws URISyntaxException, IOException {
         List<FMPProfile> profiles = new ArrayList<>();
         if (symbols == null || symbols.isEmpty()) {
             return profiles;

@@ -19,9 +19,9 @@ public class QuoteDto {
     private String industry;
     private String sector;
     private Boolean isEtf;
+    private Boolean isOwned;
 
-
-    public QuoteDto(@NotNull FMPProfile fmpProfile) {
+    public QuoteDto(@NotNull FMPProfile fmpProfile, Boolean isOwned) {
         this.symbol = fmpProfile.getSymbol();
         this.currentPrice = fmpProfile.getPrice();
         this.averageVolume = fmpProfile.getVolAvg();
@@ -31,5 +31,6 @@ public class QuoteDto {
         this.sector = fmpProfile.getSector();
         this.isEtf = fmpProfile.getIsEtf();
         this.percentChange = (currentPrice / (currentPrice - dollarChange)) - 1;
+        this.isOwned = isOwned;
     }
 }
