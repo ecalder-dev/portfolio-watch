@@ -17,13 +17,13 @@ public class SchedulerConfig {
     @Autowired
     private TransactionService transactionService;
 
-    @Scheduled(cron = "0 30 15 ? * MON-FRI")
-    public void weekdayJobs() {
+    @Scheduled(cron = "0 0 0 ? * MON-SUN", zone="GMT+5.00")
+    public void nightlyJobs() {
         transactionService.generateAccountLotListMap();
     }
 
-    @Scheduled(cron = "0 30 15 ? * SAT-SUN")
-    public void weekendJobs() {
+    @Scheduled(cron = "0 0 12 ? * MON-SUN", zone="GMT+5.00")
+    public void noonJobs() {
         transactionService.generateAccountLotListMap();
     }
 
