@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Setter @Getter
-public class NasdaqResponse<NasdaqData>{
+public class Response<NasdaqData>{
 
     private NasdaqData data;
 

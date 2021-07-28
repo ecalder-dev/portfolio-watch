@@ -6,7 +6,7 @@ import lombok.Setter;
 import java.util.Date;
 
 @Setter @Getter
-public class NasdaqDividend implements NasdaqData {
+public class Dividend implements Data {
 
     private Date exOrEffDate;
     private String type;

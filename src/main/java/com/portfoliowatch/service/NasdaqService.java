@@ -4,8 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
-import com.portfoliowatch.model.nasdaq.NasdaqDividendProfile;
-import com.portfoliowatch.model.nasdaq.NasdaqResponse;
+import com.portfoliowatch.model.nasdaq.DividendProfile;
+import com.portfoliowatch.model.nasdaq.Response;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
@@ -33,16 +33,16 @@ public class NasdaqService {
 
     private final Gson GSON = new GsonBuilder().setDateFormat("MM/dd/yyyy").create();
 
-    private final Type nasdaqDivType = new TypeToken<NasdaqResponse<NasdaqDividendProfile>>(){}.getType();
+    private final Type nasdaqDivType = new TypeToken<Response<DividendProfile>>(){}.getType();
 
     private final RequestConfig config = RequestConfig.custom()
             .setConnectTimeout(6000)
             .setConnectionRequestTimeout(6000)
             .setSocketTimeout(6000).setCookieSpec(CookieSpecs.STANDARD).build();
 
-    public NasdaqDividendProfile getDividendProfile(String symbol) throws IOException {
+    public DividendProfile getDividendProfile(String symbol) throws IOException {
         String url = String.format("https://api.nasdaq.com/api/quote/%s/dividends?assetclass=stocks", symbol.toUpperCase());
-        NasdaqResponse<NasdaqDividendProfile> instrumentResponse = null;
+        Response<DividendProfile> instrumentResponse = null;
 
         HttpUriRequest request = RequestBuilder.get()
                 .setUri(url)
@@ -68,10 +68,10 @@ public class NasdaqService {
         return instrumentResponse == null ? null : instrumentResponse.getData();
     }
 
-    public Map<String, NasdaqDividendProfile> getDividendProfiles(Set<String> symbols) throws IOException {
-        Map<String, NasdaqDividendProfile> map = new HashMap<>();
+    public Map<String, DividendProfile> getDividendProfiles(Set<String> symbols) throws IOException {
+        Map<String, DividendProfile> map = new HashMap<>();
         for (String s: symbols) {
-            NasdaqDividendProfile profile = this.getDividendProfile(s);
+            DividendProfile profile = this.getDividendProfile(s);
             map.put(s, profile);
         }
         return map;

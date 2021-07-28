@@ -1,9 +1,5 @@
 package com.portfoliowatch.service;
 
-import com.portfoliowatch.model.financialmodelingprep.FMPProfile;
-import com.portfoliowatch.model.tdameritrade.TDAmeriPosition;
-import com.portfoliowatch.util.TDAmeriPositionDtoComparator;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,11 +8,6 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import javax.mail.internet.MimeMessage;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
-import java.text.DecimalFormat;
-import java.util.*;
 
 @Service
 public class EmailService {
@@ -26,138 +17,16 @@ public class EmailService {
     @Autowired
     private JavaMailSender emailSender;
 
-    @Autowired
-    private TDAmeritradeService tdAmeritradeService;
-
-    @Autowired
-    private FMPService fmpService;
-
-    private double totalAssetValue = 0;
-
-    private double totalAssetChange = 0;
-
-    private final DecimalFormat currencyFormat = new DecimalFormat("$#,##0.00;-$#,##0.00");
-
     public void sendReport(String to) throws Exception {
         MimeMessage message = emailSender.createMimeMessage();
-        totalAssetValue = 0;
-        totalAssetChange = 0;
 
         String result = "";
 
-        try ( InputStream inputStream = getClass().getClassLoader().getResourceAsStream("templates/ReportTemplate.html")) {
-            assert inputStream != null;
-            StringWriter writer = new StringWriter();
-            IOUtils.copy(inputStream, writer, StandardCharsets.UTF_8.name());
-            result = writer.toString();
-        }
-
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
         helper.setTo(to);
-        List<TDAmeriPosition> positions = tdAmeritradeService.getTDAccountPositions();
-        Set<String> tickers = new HashSet<>();
-        for (TDAmeriPosition p : positions) {
-            String symbol = p.getInstrument().getSymbol();
-            tickers.add(symbol);
-        }
-        List<FMPProfile> profiles = fmpService.getCompanyProfiles(tickers);
-
-        result = result.replace("[first_name]", "there");
-        result = result.replace("[stock_table]", createStockTable(positions, profiles));
-        result = result.replace("[total_asset_value]", currencyFormat.format(totalAssetValue));
-        String totalAssetChangeColor = totalAssetChange >= 0 ? "green" : "red";
-        result = result.replace("[total_asset_change]",
-                String.format("<span style=\"color:%s\">%s</span>",
-                        totalAssetChangeColor, currencyFormat.format(totalAssetChange)));
         helper.setText(result, true);
         helper.setSubject("Daily Watch Report");
         emailSender.send(message);
     }
 
-    private String createStockTable(List<TDAmeriPosition> positions, List<FMPProfile> profiles) {
-        if (positions == null || positions.isEmpty()) {
-            return "";
-        }
-        Report report = new Report(positions, profiles);
-        Set<String> headers = report.headers;
-        StringBuilder htmlBuilder = new StringBuilder().append("<table>");
-        htmlBuilder.append("<tr>");
-        for (String h: headers) {
-
-            htmlBuilder.append(String.format("<th>%s</th>", h));
-        }
-        htmlBuilder.append("</tr>");
-        int count = 0;
-        for (Map<String, String> r: report.rows) {
-            if (count++ % 2 == 0) {
-                htmlBuilder.append("<tr style=\"background: #E6E8FA\">");
-            } else {
-                htmlBuilder.append("<tr>");
-            }
-            for (String h: headers) {
-                htmlBuilder.append(String.format("<td>%s</td>", r.get(h)));
-            }
-            htmlBuilder.append("</tr>");
-        }
-        htmlBuilder.append("</table>");
-        return htmlBuilder.toString();
-    }
-
-    class Report {
-        private final Set<String> headers;
-        private final List<Map<String, String>> rows;
-        private final List<TDAmeriPosition> positions;
-        private final List<FMPProfile> profiles;
-
-        public Report(List<TDAmeriPosition> positions, List<FMPProfile> profiles) {
-            this.rows = new ArrayList<>();
-            this.positions = positions;
-            this.positions.sort(new TDAmeriPositionDtoComparator());
-            this.headers = new LinkedHashSet<>();
-            this.profiles = profiles;
-            for (TDAmeriPosition position: positions) {
-                Optional<FMPProfile> profile = profiles.stream()
-                        .filter(p -> p.getSymbol().equals(position.getInstrument().getSymbol())).findFirst();
-                profile.ifPresent(fmpProfile -> totalAssetValue += position.getSettledLongQuantity() * fmpProfile.getPrice());
-                totalAssetChange += position.getSettledLongQuantity() * position.getCurrentDayProfitLossPercentage();
-            }
-            this.buildReport();
-        }
-
-        private void buildReport() {
-            headers.add("Symbol");
-            headers.add("Change %");
-            headers.add("Change $");
-            headers.add("Current $");
-            headers.add("Portfolio %");
-            headers.add("Sector");
-
-
-            for (TDAmeriPosition position: positions) {
-                String symbol = position.getInstrument().getSymbol();
-                Optional<FMPProfile> optionalFMPProfile = profiles.stream()
-                        .filter(p -> p.getSymbol().equals(symbol)).findFirst();
-                FMPProfile fmpProfile = optionalFMPProfile.orElse(null);
-                Double price = 0.0;
-                String companyName = "N/A";
-                String sector = "N/A";
-                if (fmpProfile != null) {
-                    price = fmpProfile.getPrice();
-                    companyName = fmpProfile.getCompanyName();
-                    sector = fmpProfile.getIsEtf() ? "ETF" : fmpProfile.getSector();
-                }
-
-                Map<String, String> columns = new HashMap<>();
-                columns.put("Symbol", String.format("<label title=\"%s\">%s</label>", companyName, symbol));
-                columns.put("Change %", String.format("%.2f%%", position.getCurrentDayProfitLossPercentage()));
-                columns.put("Change $", String.format("%s",
-                        currencyFormat.format(position.getCurrentDayProfitLoss() / position.getLongQuantity())));
-                columns.put("Current $", String.format("%s", currencyFormat.format(price)));
-                columns.put("Portfolio %", String.format("%.2f%%", ((position.getSettledLongQuantity() * price) /
-                        totalAssetValue) * 100));
-                columns.put("Sector", sector);
-                rows.add(columns);
-            }
-        }
-    }
 }

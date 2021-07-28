@@ -1,4 +1,4 @@
 package com.portfoliowatch.model.nasdaq;
 
-public interface NasdaqData {
+public interface Data {
 }
