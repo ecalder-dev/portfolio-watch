@@ -2,10 +2,9 @@ package com.portfoliowatch.service;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.reflect.TypeToken;
 import com.portfoliowatch.model.nasdaq.DividendProfile;
-import com.portfoliowatch.model.nasdaq.Response;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
@@ -22,6 +21,8 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -33,16 +34,18 @@ public class NasdaqService {
 
     private final Gson GSON = new GsonBuilder().setDateFormat("MM/dd/yyyy").create();
 
-    private final Type nasdaqDivType = new TypeToken<Response<DividendProfile>>(){}.getType();
+    private final Type responseType = new TypeToken<Map<String, Object>>(){}.getType();
 
     private final RequestConfig config = RequestConfig.custom()
             .setConnectTimeout(6000)
             .setConnectionRequestTimeout(6000)
             .setSocketTimeout(6000).setCookieSpec(CookieSpecs.STANDARD).build();
 
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+
     public DividendProfile getDividendProfile(String symbol) throws IOException {
         String url = String.format("https://api.nasdaq.com/api/quote/%s/dividends?assetclass=stocks", symbol.toUpperCase());
-        Response<DividendProfile> instrumentResponse = null;
+        DividendProfile dividendProfile = null;
 
         HttpUriRequest request = RequestBuilder.get()
                 .setUri(url)
@@ -54,18 +57,55 @@ public class NasdaqService {
                 .build();
 
         try (CloseableHttpClient httpclient = HttpClients.custom().setDefaultRequestConfig(config).build()) {
-
             try (CloseableHttpResponse response = httpclient.execute(request)) {
                 String responseStr = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8.name());
                 try {
-                    instrumentResponse = GSON.fromJson(responseStr, nasdaqDivType);
-                } catch (JsonSyntaxException jsonSyntaxException) {
-                    logger.info(jsonSyntaxException.getMessage());
+                    Map<String, Object> responseMap = GSON.fromJson(responseStr, responseType);
+                    if (responseMap.get("data") instanceof LinkedTreeMap) {
+                        @SuppressWarnings("unchecked")
+                        LinkedTreeMap<String, Object> data = (LinkedTreeMap<String, Object>) responseMap.get("data");
+                        if (data != null) {
+                            dividendProfile = new DividendProfile();
+                            try {
+                                dividendProfile.setAnnualizedDividend(Double
+                                        .parseDouble(String.valueOf(data.get("annualizedDividend"))));
+                            } catch (NumberFormatException numberFormatException) {
+                                logger.error("Unable to parse annualized dividend: " + responseMap.get("annualizedDividend"));
+                                return null;
+                            }
+                            dividendProfile.setYield(String.valueOf(data.get("yield")));
+                            try {
+                                dividendProfile.setPayoutRatio(Double
+                                        .parseDouble(String.valueOf(data.get("payoutRatio"))));
+                            } catch (NumberFormatException numberFormatException) {
+                                logger.error("Unable to parse payout ratio " + responseMap.get("payoutRatio"));
+                                dividendProfile.setPayoutRatio(null);
+                            }
+                            try {
+                                String dateStr = String.valueOf(data.get("exDividendDate"));
+                                dividendProfile.setExDividendDate(dateFormat.parse(dateStr));
+                            } catch (ParseException parseException) {
+                                logger.error("Unable to parse ex-dividend date " + responseMap.get("exDividendDate"));
+                                dividendProfile.setExDividendDate(null);
+                            }
+                            try {
+                                String dateStr = String.valueOf(data.get("dividendPaymentDate"));
+                                dividendProfile.setDividendPaymentDate(dateFormat.parse(dateStr));
+                            } catch (ParseException parseException) {
+                                logger.error("Unable to parse dividend payments " + responseMap.get("dividendPaymentDate"));
+                                dividendProfile.setDividendPaymentDate(null);
+                            }
+                        }
+                    } else {
+                        logger.error("Invalid symbol: " + symbol);
+                    }
+                } catch (Exception exception) {
+                    logger.error("Error parsing dividend information for: " + symbol);
+                    logger.error(exception.getLocalizedMessage());
                 }
             }
         }
-
-        return instrumentResponse == null ? null : instrumentResponse.getData();
+        return dividendProfile;
     }
 
     public Map<String, DividendProfile> getDividendProfiles(Set<String> symbols) throws IOException {
