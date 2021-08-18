@@ -40,7 +40,7 @@ public class FMPController {
         return new ResponseEntity<>(data, httpStatus);
     }
 
-    @GetMapping("news")
+    /*@GetMapping("news")
     public ResponseEntity<List<FMPNews>> getNews(@RequestParam Set<String> symbols) {
         List<FMPNews> data;
         HttpStatus httpStatus;
@@ -53,5 +53,5 @@ public class FMPController {
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         }
         return new ResponseEntity<>(data, httpStatus);
-    }
+    }*/
 }
