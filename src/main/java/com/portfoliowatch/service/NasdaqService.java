@@ -16,6 +16,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -108,6 +109,7 @@ public class NasdaqService {
         return dividendProfile;
     }
 
+    @Cacheable("dividends")
     public Map<String, DividendProfile> getDividendProfiles(Set<String> symbols) throws IOException {
         Map<String, DividendProfile> map = new HashMap<>();
         for (String s: symbols) {
