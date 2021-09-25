@@ -7,7 +7,7 @@ import java.util.Date;
 
 @Getter
 @Setter
-public class DividendProfile implements Data {
+public class DividendProfile {
 
     private Date exDividendDate;
     private Date dividendPaymentDate;
