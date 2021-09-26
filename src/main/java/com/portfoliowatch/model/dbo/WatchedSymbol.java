@@ -1,4 +1,4 @@
-package com.portfoliowatch.model;
+package com.portfoliowatch.model.dbo;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -2,12 +2,14 @@ package com.portfoliowatch.service;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.reflect.TypeToken;
 import com.portfoliowatch.model.nasdaq.CompanyProfile;
 import com.portfoliowatch.model.nasdaq.DividendProfile;
 import com.portfoliowatch.model.nasdaq.Info;
 import com.portfoliowatch.model.nasdaq.ResponseData;
+import com.portfoliowatch.util.DateGsonTypeAdapter;
+import com.portfoliowatch.util.DoubleGsonTypeAdapter;
+import com.portfoliowatch.util.LongGsonTypeAdapter;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
@@ -25,8 +27,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -36,7 +37,11 @@ public class NasdaqService {
 
     private static final Logger logger = LoggerFactory.getLogger(NasdaqService.class);
 
-    private final Gson GSON = new GsonBuilder().setDateFormat("MM/dd/yyyy").create();
+    private final Gson GSON = new GsonBuilder()
+            .registerTypeAdapter(Double.class, new DoubleGsonTypeAdapter())
+            .registerTypeAdapter(Long.class, new LongGsonTypeAdapter())
+            .registerTypeAdapter(Date.class, new DateGsonTypeAdapter())
+            .create();
 
     private final Type dividendResponseType = new TypeToken<ResponseData<DividendProfile>>(){}.getType();
 
@@ -49,30 +54,79 @@ public class NasdaqService {
             .setConnectionRequestTimeout(6000)
             .setSocketTimeout(6000).setCookieSpec(CookieSpecs.STANDARD).build();
 
+    /**
+     *
+     * @param symbol The symbol to look up.
+     * @return A DividendProfile data object.
+     * @throws IOException Throws an exception from REST request.
+     */
+    @Cacheable("dividend")
     public DividendProfile getDividendProfile(String symbol) throws IOException {
         String url = String.format("https://api.nasdaq.com/api/quote/%s/dividends?assetclass=stocks", symbol.toUpperCase());
         ResponseData<DividendProfile> response = GSON.fromJson(performGet(url), dividendResponseType);
+        if (response.getData() == null) {
+            // attempt for an etf asset class
+            url = String.format("https://api.nasdaq.com/api/quote/%s/dividends?assetclass=etf", symbol.toUpperCase());
+            response = GSON.fromJson(performGet(url), dividendResponseType);
+        }
         return response.getData();
     }
 
+    /**
+     *
+     * @param symbol The symbol to look up.
+     * @return A CompanyProfile data object.
+     * @throws IOException Throws an exception from REST request.
+     */
+    @Cacheable("company-portfolio")
     public CompanyProfile getCompanyProfile(String symbol) throws IOException {
         String url = String.format("https://api.nasdaq.com/api/company/%s/company-profile", symbol.toUpperCase());
-        ResponseData<CompanyProfile> response = GSON.fromJson(performGet(url), companyProfileResponseType);
+        String responseStr = performGet(url);
+        ResponseData<CompanyProfile> response = GSON.fromJson(responseStr, companyProfileResponseType);
         return response.getData();
     }
 
+    /**
+     *
+     * @param symbol The symbol to look up.
+     * @return A Info data object.
+     * @throws IOException Throws an exception from REST request.
+     */
+    @Cacheable("info" )
     public Info getInfo(String symbol) throws IOException {
         String url = String.format("https://api.nasdaq.com/api/quote/%s/info?assetclass=stocks", symbol.toUpperCase());
         ResponseData<Info> response = GSON.fromJson(performGet(url), infoResponseType);
+        if (response.getData() == null) {
+            // attempt for an etf asset class
+            url = String.format("https://api.nasdaq.com/api/quote/%s/info?assetclass=etf", symbol.toUpperCase());
+            response = GSON.fromJson(performGet(url), infoResponseType);
+        }
         return response.getData();
     }
 
-    @Cacheable("dividends")
     public Map<String, DividendProfile> getDividendProfiles(Set<String> symbols) throws IOException {
         Map<String, DividendProfile> map = new HashMap<>();
         for (String s: symbols) {
             DividendProfile profile = this.getDividendProfile(s);
             map.put(s, profile);
+        }
+        return map;
+    }
+
+    public Map<String, CompanyProfile> getCompanyPortfolios(Set<String> symbols) throws IOException {
+        Map<String, CompanyProfile> map = new HashMap<>();
+        for (String s: symbols) {
+            CompanyProfile profile = this.getCompanyProfile(s);
+            map.put(s, profile);
+        }
+        return map;
+    }
+
+    public Map<String, Info> getAllInfo(Set<String> symbols) throws IOException {
+        Map<String, Info> map = new HashMap<>();
+        for (String s: symbols) {
+            Info info = this.getInfo(s);
+            map.put(s, info);
         }
         return map;
     }
