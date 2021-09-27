@@ -1,12 +1,10 @@
 package com.portfoliowatch.repository;
 
-import com.portfoliowatch.model.dbo.WatchedSymbol;
+import com.portfoliowatch.model.dbo.Company;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface WatchSymbolRepository extends JpaRepository<WatchedSymbol, String> {
-
-
+public interface CompanyRepository extends JpaRepository<Company, String> {
 
 }

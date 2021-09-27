@@ -1,7 +1,7 @@
 package com.portfoliowatch.service;
 
-import com.portfoliowatch.model.Account;
-import com.portfoliowatch.model.Transaction;
+import com.portfoliowatch.model.dbo.Account;
+import com.portfoliowatch.model.dbo.Transaction;
 import com.portfoliowatch.model.dto.CostBasisDto;
 import com.portfoliowatch.repository.AccountRepository;
 import com.portfoliowatch.util.LotList;

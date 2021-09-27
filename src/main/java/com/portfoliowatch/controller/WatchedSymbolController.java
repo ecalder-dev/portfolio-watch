@@ -1,6 +1,6 @@
 package com.portfoliowatch.controller;
 
-import com.portfoliowatch.model.WatchedSymbol;
+import com.portfoliowatch.model.dbo.WatchedSymbol;
 import com.portfoliowatch.service.WatchedSymbolService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

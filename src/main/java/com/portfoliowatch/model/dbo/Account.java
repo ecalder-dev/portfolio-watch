@@ -1,4 +1,4 @@
-package com.portfoliowatch.model;
+package com.portfoliowatch.model.dbo;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.portfoliowatch.model.dto.CostBasisDto;

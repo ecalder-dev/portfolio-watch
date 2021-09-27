@@ -1,6 +1,6 @@
 package com.portfoliowatch.controller;
 
-import com.portfoliowatch.model.Transaction;
+import com.portfoliowatch.model.dbo.Transaction;
 import com.portfoliowatch.service.TransactionService;
 import com.portfoliowatch.util.Lot;
 import org.springframework.beans.factory.annotation.Autowired;
