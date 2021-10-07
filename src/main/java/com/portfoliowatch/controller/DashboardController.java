@@ -3,7 +3,7 @@ package com.portfoliowatch.controller;
 import com.portfoliowatch.model.dto.QuoteDto;
 import com.portfoliowatch.model.wsj.WSJInstrument;
 import com.portfoliowatch.service.DashboardService;
-import com.portfoliowatch.service.WSJService;
+import com.portfoliowatch.api.WallStreetJournalAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +23,6 @@ public class DashboardController {
 
     @Autowired
     private DashboardService portfolioStatsService;
-
-    @Autowired
-    private WSJService WSJService;
 
     @GetMapping("quotes")
     public ResponseEntity<List<QuoteDto>> getQuoteList() {
@@ -47,7 +44,7 @@ public class DashboardController {
         List<WSJInstrument> data;
         HttpStatus httpStatus;
         try {
-            data = WSJService.getIndices();
+            data = WallStreetJournalAPI.getIndices();
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             data = null;

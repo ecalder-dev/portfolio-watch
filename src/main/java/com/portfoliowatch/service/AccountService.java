@@ -1,5 +1,6 @@
 package com.portfoliowatch.service;
 
+import com.portfoliowatch.api.NasdaqAPI;
 import com.portfoliowatch.model.entity.Account;
 import com.portfoliowatch.model.entity.Transaction;
 import com.portfoliowatch.model.dto.CostBasisDto;
@@ -24,9 +25,6 @@ public class AccountService {
 
     @Autowired
     private AccountRepository accountRepository;
-
-    @Autowired
-    private NasdaqService nasdaqService;
 
     @Autowired
     private TransactionService transactionService;
@@ -67,7 +65,7 @@ public class AccountService {
         Map<String, LotList> symbols = transactionService.getAccountLotListMap().get(account.getAccountId());
         Map<String, DividendProfile> dividendProfileMap = new HashMap<>();
         try {
-            dividendProfileMap = nasdaqService.getDividendProfiles(symbols.keySet());
+            dividendProfileMap = NasdaqAPI.getDividendProfiles(symbols.keySet());
         } catch (IOException e) {
             log.error("Error getting dividend profiles: {}", symbols.keySet());
         }

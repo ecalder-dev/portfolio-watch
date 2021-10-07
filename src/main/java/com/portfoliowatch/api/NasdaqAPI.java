@@ -1,4 +1,4 @@
-package com.portfoliowatch.service;
+package com.portfoliowatch.api;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -21,7 +21,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -34,22 +33,21 @@ import java.util.Map;
 import java.util.Set;
 
 @Slf4j
-@Service
-public class NasdaqService {
+public final class NasdaqAPI {
 
-    private final Gson GSON = new GsonBuilder()
+    private static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(Double.class, new DoubleGsonTypeAdapter())
             .registerTypeAdapter(Long.class, new LongGsonTypeAdapter())
             .registerTypeAdapter(Date.class, new DateGsonTypeAdapter())
             .create();
 
-    private final Type dividendResponseType = new TypeToken<ResponseData<DividendProfile>>(){}.getType();
+    private static final Type dividendResponseType = new TypeToken<ResponseData<DividendProfile>>(){}.getType();
 
-    private final Type companyProfileResponseType = new TypeToken<ResponseData<CompanyProfile>>(){}.getType();
+    private static final Type companyProfileResponseType = new TypeToken<ResponseData<CompanyProfile>>(){}.getType();
 
-    private final Type infoResponseType = new TypeToken<ResponseData<StockInfo>>(){}.getType();
+    private static final Type infoResponseType = new TypeToken<ResponseData<StockInfo>>(){}.getType();
 
-    private final RequestConfig config = RequestConfig.custom()
+    private static final RequestConfig config = RequestConfig.custom()
             .setConnectTimeout(6000)
             .setConnectionRequestTimeout(6000)
             .setSocketTimeout(6000).setCookieSpec(CookieSpecs.STANDARD).build();
@@ -60,8 +58,7 @@ public class NasdaqService {
      * @return A DividendProfile data object.
      * @throws IOException Throws an exception from REST request.
      */
-    @Cacheable("dividend")
-    public DividendProfile getDividendProfile(String symbol) throws IOException {
+    public static DividendProfile getDividendProfile(String symbol) throws IOException {
         String url = String.format("https://api.nasdaq.com/api/quote/%s/dividends?assetclass=stocks", symbol.toUpperCase());
         ResponseData<DividendProfile> response = GSON.fromJson(performGet(url), dividendResponseType);
         if (response.getData() == null) {
@@ -78,8 +75,7 @@ public class NasdaqService {
      * @return A CompanyProfile data object.
      * @throws IOException Throws an exception from REST request.
      */
-    @Cacheable("company-portfolio")
-    public CompanyProfile getCompanyProfile(String symbol) throws IOException {
+    public static CompanyProfile getCompanyProfile(String symbol) throws IOException {
         String url = String.format("https://api.nasdaq.com/api/company/%s/company-profile", symbol.toUpperCase());
         String responseStr = performGet(url);
         ResponseData<CompanyProfile> response = GSON.fromJson(responseStr, companyProfileResponseType);
@@ -93,7 +89,7 @@ public class NasdaqService {
      * @throws IOException Throws an exception from REST request.
      */
     @Cacheable("info" )
-    public StockInfo getInfo(String symbol) throws IOException {
+    public static StockInfo getInfo(String symbol) throws IOException {
         String url = String.format("https://api.nasdaq.com/api/quote/%s/info?assetclass=stocks", symbol.toUpperCase());
         ResponseData<StockInfo> response = GSON.fromJson(performGet(url), infoResponseType);
         if (response.getData() == null) {
@@ -110,10 +106,10 @@ public class NasdaqService {
      * @return A list of dividend profiles.
      * @throws IOException An exception at service error.
      */
-    public Map<String, DividendProfile> getDividendProfiles(Set<String> symbols) throws IOException {
+    public static Map<String, DividendProfile> getDividendProfiles(Set<String> symbols) throws IOException {
         Map<String, DividendProfile> map = new HashMap<>();
         for (String s: symbols) {
-            DividendProfile profile = this.getDividendProfile(s);
+            DividendProfile profile = getDividendProfile(s);
             map.put(s, profile);
         }
         return map;
@@ -125,10 +121,10 @@ public class NasdaqService {
      * @return A list of company profiles.
      * @throws IOException An exception at service error.
      */
-    public List<CompanyProfile> getCompanyProfiles(Set<String> symbols) throws IOException {
+    public static List<CompanyProfile> getCompanyProfiles(Set<String> symbols) throws IOException {
         List<CompanyProfile> companyProfiles = new ArrayList<>();
         for (String s: symbols) {
-            CompanyProfile profile = this.getCompanyProfile(s);
+            CompanyProfile profile = getCompanyProfile(s);
             if (profile != null) {
                 companyProfiles.add(profile);
             }
@@ -142,10 +138,10 @@ public class NasdaqService {
      * @return A list of stock info.
      * @throws IOException An exception at service error.
      */
-    public Map<String, StockInfo> getAllInfo(Set<String> symbols) throws IOException {
+    public static Map<String, StockInfo> getAllInfo(Set<String> symbols) throws IOException {
         Map<String, StockInfo> map = new HashMap<>();
         for (String s: symbols) {
-            StockInfo stockInfo = this.getInfo(s);
+            StockInfo stockInfo = getInfo(s);
             map.put(s, stockInfo);
         }
         return map;
@@ -157,7 +153,7 @@ public class NasdaqService {
      * @return A string representation of return.
      * @throws IOException An exception returned from http client.
      */
-    private String performGet(String url) throws IOException {
+    private static String performGet(String url) throws IOException {
         HttpUriRequest request =  RequestBuilder.get()
                 .setUri(url)
                 .setHeader(HttpHeaders.ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")

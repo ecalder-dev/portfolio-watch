@@ -1,5 +1,6 @@
 package com.portfoliowatch.service;
 
+import com.portfoliowatch.api.NasdaqAPI;
 import com.portfoliowatch.model.dto.QuoteDto;
 import com.portfoliowatch.model.entity.Company;
 import com.portfoliowatch.model.entity.WatchedSymbol;
@@ -19,9 +20,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class DashboardService {
-
-    @Autowired
-    private NasdaqService nasdaqService;
 
     @Autowired
     private TransactionService transactionService;
@@ -45,7 +43,7 @@ public class DashboardService {
         Set<String> equityOwned = transactionService.getEquityOwned();
         symbols.addAll(transactionService.getEquityOwned());
 
-        Map<String, StockInfo> infoMap = this.nasdaqService.getAllInfo(symbols);
+        Map<String, StockInfo> infoMap = NasdaqAPI.getAllInfo(symbols);
         List<Company> companyList = this.companyService.getCompanies(symbols);
 
         for (String symbol : symbols) {

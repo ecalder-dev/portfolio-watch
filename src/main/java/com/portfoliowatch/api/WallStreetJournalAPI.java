@@ -1,4 +1,4 @@
-package com.portfoliowatch.service;
+package com.portfoliowatch.api;
 
 import com.google.gson.Gson;
 import com.portfoliowatch.model.wsj.WSJId;
@@ -10,19 +10,17 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-@Service
-public class WSJService {
+public final class WallStreetJournalAPI {
 
-    private final Gson GSON = new Gson();
+    private static final Gson GSON = new Gson();
 
-    public List<WSJInstrument> getIndices() throws URISyntaxException, IOException {
+    public static List<WSJInstrument> getIndices() throws URISyntaxException, IOException {
         String SRV_TYPE = "mdc_quotes";
         String INDEX_URL = "https://www.wsj.com/market-data/stocks/us/indexes";
         List<WSJInstrument> responseData = null;

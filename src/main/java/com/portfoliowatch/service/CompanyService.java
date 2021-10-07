@@ -1,5 +1,6 @@
 package com.portfoliowatch.service;
 
+import com.portfoliowatch.api.NasdaqAPI;
 import com.portfoliowatch.model.entity.Company;
 import com.portfoliowatch.model.nasdaq.CompanyProfile;
 import com.portfoliowatch.repository.CompanyRepository;
@@ -20,9 +21,6 @@ public class CompanyService {
     @Autowired
     private CompanyRepository companyRepository;
 
-    @Autowired
-    private NasdaqService nasdaqApi;
-
     /**
      * Gets all companies from database.
      * @return List of companies.
@@ -41,7 +39,7 @@ public class CompanyService {
         Company foundCompany = companyRepository.findById(symbol).orElse(null);
         if (foundCompany == null) {
             try {
-                CompanyProfile companyProfile = nasdaqApi.getCompanyProfile(symbol);
+                CompanyProfile companyProfile = NasdaqAPI.getCompanyProfile(symbol);
                 if (companyProfile != null) {
                     Company company = new Company();
                     company.setSymbol(companyProfile.getSymbol().getValue());
@@ -53,7 +51,7 @@ public class CompanyService {
                     company.setSector(companyProfile.getSector().getValue());
                     foundCompany = companyRepository.save(company);
                 } else {
-                    log.error("Company profile not found from Nasdaq: {}", nasdaqApi);
+                    log.error("Company profile not found from Nasdaq.");
                 }
             } catch (IOException e) {
                 log.error("Unable to reach Nasdaq service: {}", e.getLocalizedMessage());
@@ -75,7 +73,7 @@ public class CompanyService {
         symbolsTemp.removeAll(symbolsFound);
         if (!symbolsTemp.isEmpty()) {
             try {
-                List<CompanyProfile> companyProfiles = nasdaqApi.getCompanyProfiles(symbolsTemp);
+                List<CompanyProfile> companyProfiles = NasdaqAPI.getCompanyProfiles(symbolsTemp);
                 for (CompanyProfile companyProfile: companyProfiles) {
                     log.info("Adding new profile: {}", companyProfile.toString());
                     Company company = new Company();
