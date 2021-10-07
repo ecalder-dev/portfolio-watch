@@ -1,5 +1,7 @@
 package com.portfoliowatch.util;
 
+import com.portfoliowatch.model.dto.Lot;
+
 import java.util.Comparator;
 
 public class LotComparator implements Comparator<Lot> {

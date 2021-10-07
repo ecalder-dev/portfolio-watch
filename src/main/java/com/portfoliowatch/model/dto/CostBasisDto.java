@@ -1,15 +1,12 @@
 package com.portfoliowatch.model.dto;
 
-import com.portfoliowatch.util.LotList;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
 
-@Setter @Getter
-@ToString
+@Data
 public class CostBasisDto {
     private String symbol;
     private LotList lotList;
     private Double adjustedPrice;
     private Double totalShares;
+    private Double totalAnnualDividend;
 }

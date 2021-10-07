@@ -1,18 +1,19 @@
-package com.portfoliowatch.util;
+package com.portfoliowatch.model.dto;
 
+import com.portfoliowatch.util.LotComparator;
+import lombok.Data;
 import lombok.Getter;
 
 import java.util.LinkedList;
 import java.util.List;
 
+@Data
 public class LotList extends LinkedList<Lot> {
 
     private final LotComparator lotComparator;
 
-    @Getter
     private double totalShares;
 
-    @Getter
     private double totalPrice;
 
     public LotList() {

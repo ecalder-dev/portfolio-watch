@@ -21,14 +21,13 @@ public class LongGsonTypeAdapter extends TypeAdapter<Long> {
     public Long read(JsonReader jsonReader) throws IOException {
         if (jsonReader.peek() == JsonToken.NULL) {
             jsonReader.nextNull();
-            return null;
+            return 0L;
         }
         String stringValue = jsonReader.nextString();
         try {
-            Long value = Long.valueOf(stringValue);
-            return value;
+            return Long.valueOf(stringValue);
         } catch (NumberFormatException e) {
-            return null;
+            return 0L;
         }
     }
 }

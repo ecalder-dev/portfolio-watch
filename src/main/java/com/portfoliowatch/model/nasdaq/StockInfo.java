@@ -1,10 +1,9 @@
 package com.portfoliowatch.model.nasdaq;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter @Setter
-public class Info {
+@Data
+public class StockInfo {
     private String symbol;
     private String companyName;
     private String stockType;

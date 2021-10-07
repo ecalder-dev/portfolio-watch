@@ -6,13 +6,13 @@ public final class NumberParser {
 
     public static Double parseDouble(String str) {
         if (str == null) {
-            return null;
+            return 0.0;
         } else {
             str = str.replaceAll(charactersToRemove, "");
             try {
                 return Double.parseDouble(str);
             } catch (NumberFormatException e) {
-                return null;
+                return 0.0;
             }
         }
     }

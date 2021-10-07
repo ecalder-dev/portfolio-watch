@@ -1,6 +1,6 @@
 package com.portfoliowatch.controller;
 
-import com.portfoliowatch.model.dbo.Account;
+import com.portfoliowatch.model.entity.Account;
 import com.portfoliowatch.service.AccountService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

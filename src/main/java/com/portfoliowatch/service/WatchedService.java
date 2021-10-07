@@ -1,6 +1,6 @@
 package com.portfoliowatch.service;
 
-import com.portfoliowatch.model.dbo.WatchedSymbol;
+import com.portfoliowatch.model.entity.WatchedSymbol;
 import com.portfoliowatch.repository.WatchSymbolRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class WatchedSymbolService {
+public class WatchedService {
 
     @Autowired
     private WatchSymbolRepository watchSymbolRepository;

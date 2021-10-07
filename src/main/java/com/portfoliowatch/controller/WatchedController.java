@@ -1,7 +1,7 @@
 package com.portfoliowatch.controller;
 
-import com.portfoliowatch.model.dbo.WatchedSymbol;
-import com.portfoliowatch.service.WatchedSymbolService;
+import com.portfoliowatch.model.entity.WatchedSymbol;
+import com.portfoliowatch.service.WatchedService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,12 +11,12 @@ import java.util.List;
 
 @RequestMapping("/api")
 @RestController
-public class WatchedSymbolController {
+public class WatchedController {
 
     @Autowired
-    WatchedSymbolService watchedSymbolService;
+    WatchedService watchedSymbolService;
 
-    @GetMapping("/watching")
+    @GetMapping("/watch")
     public ResponseEntity<List<WatchedSymbol>> getWatching() {
         List<WatchedSymbol> data;
         HttpStatus httpStatus;
@@ -30,7 +30,7 @@ public class WatchedSymbolController {
         return new ResponseEntity<>(data, httpStatus);
     }
 
-    @PostMapping("/watching")
+    @PostMapping("/watch")
     public ResponseEntity<WatchedSymbol> postWatching(@RequestParam String symbol) {
         WatchedSymbol data;
         HttpStatus httpStatus;

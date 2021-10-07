@@ -1,15 +1,14 @@
-package com.portfoliowatch.util;
+package com.portfoliowatch.model.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
 import java.util.Date;
 
-@Getter @Setter @ToString
-@NoArgsConstructor @AllArgsConstructor
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class
 Lot {
     private Double shares;

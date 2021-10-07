@@ -1,9 +1,9 @@
 package com.portfoliowatch.service;
 
-import com.portfoliowatch.model.dbo.Transaction;
+import com.portfoliowatch.model.entity.Transaction;
 import com.portfoliowatch.repository.TransactionRepository;
-import com.portfoliowatch.util.Lot;
-import com.portfoliowatch.util.LotList;
+import com.portfoliowatch.model.dto.Lot;
+import com.portfoliowatch.model.dto.LotList;
 import lombok.Getter;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.math3.util.Precision;

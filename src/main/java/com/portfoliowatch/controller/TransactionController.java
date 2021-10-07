@@ -1,8 +1,8 @@
 package com.portfoliowatch.controller;
 
-import com.portfoliowatch.model.dbo.Transaction;
+import com.portfoliowatch.model.entity.Transaction;
 import com.portfoliowatch.service.TransactionService;
-import com.portfoliowatch.util.Lot;
+import com.portfoliowatch.model.dto.Lot;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

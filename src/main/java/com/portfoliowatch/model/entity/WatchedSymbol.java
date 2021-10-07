@@ -1,14 +1,13 @@
-package com.portfoliowatch.model.dbo;
+package com.portfoliowatch.model.entity;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-@Getter @Setter
+@Data
 @Entity
 @Table(name = "watched_symbols")
 public class WatchedSymbol {

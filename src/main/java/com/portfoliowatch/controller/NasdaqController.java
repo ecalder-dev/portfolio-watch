@@ -2,7 +2,7 @@ package com.portfoliowatch.controller;
 
 import com.portfoliowatch.model.nasdaq.CompanyProfile;
 import com.portfoliowatch.model.nasdaq.DividendProfile;
-import com.portfoliowatch.model.nasdaq.Info;
+import com.portfoliowatch.model.nasdaq.StockInfo;
 import com.portfoliowatch.service.NasdaqService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,14 +25,14 @@ public class NasdaqController {
     private static final Logger logger = LoggerFactory.getLogger(NasdaqController.class);
 
     @Autowired
-    private NasdaqService nasdaqService;
+    private NasdaqService nasdaqApi;
 
     @GetMapping("dividend-profile")
     public ResponseEntity<DividendProfile> getDividendProfile(@RequestParam String symbol) {
         DividendProfile data;
         HttpStatus httpStatus;
         try {
-            data = nasdaqService.getDividendProfile(symbol);
+            data = nasdaqApi.getDividendProfile(symbol);
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             data = null;
@@ -46,7 +47,7 @@ public class NasdaqController {
         Map<String, DividendProfile> data;
         HttpStatus httpStatus;
         try {
-            data = nasdaqService.getDividendProfiles(symbol);
+            data = nasdaqApi.getDividendProfiles(symbol);
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             data = null;
@@ -61,7 +62,7 @@ public class NasdaqController {
         CompanyProfile data;
         HttpStatus httpStatus;
         try {
-            data = nasdaqService.getCompanyProfile(symbol);
+            data = nasdaqApi.getCompanyProfile(symbol);
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             data = null;
@@ -72,11 +73,11 @@ public class NasdaqController {
     }
 
     @GetMapping("company-profiles")
-    public ResponseEntity<Map<String, CompanyProfile>> getCompanyProfiles(@RequestParam Set<String> symbols) {
-        Map<String, CompanyProfile> data;
+    public ResponseEntity<List<CompanyProfile>> getCompanyProfiles(@RequestParam Set<String> symbols) {
+        List<CompanyProfile> data;
         HttpStatus httpStatus;
         try {
-            data = nasdaqService.getCompanyPortfolios(symbols);
+            data = nasdaqApi.getCompanyProfiles(symbols);
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             data = null;
@@ -87,11 +88,11 @@ public class NasdaqController {
     }
 
     @GetMapping("info")
-    public ResponseEntity<Info> getInfo(@RequestParam String symbol) {
-        Info data;
+    public ResponseEntity<StockInfo> getInfo(@RequestParam String symbol) {
+        StockInfo data;
         HttpStatus httpStatus;
         try {
-            data = nasdaqService.getInfo(symbol);
+            data = nasdaqApi.getInfo(symbol);
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             data = null;
@@ -102,11 +103,11 @@ public class NasdaqController {
     }
 
     @GetMapping("info/all")
-    public ResponseEntity<Map<String, Info>> getAllInfo(@RequestParam Set<String> symbols) {
-        Map<String, Info> data;
+    public ResponseEntity<Map<String, StockInfo>> getAllInfo(@RequestParam Set<String> symbols) {
+        Map<String, StockInfo> data;
         HttpStatus httpStatus;
         try {
-            data = nasdaqService.getAllInfo(symbols);
+            data = nasdaqApi.getAllInfo(symbols);
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             data = null;
