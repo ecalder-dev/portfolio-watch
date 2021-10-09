@@ -7,6 +7,8 @@ import com.portfoliowatch.model.nasdaq.CompanyProfile;
 import com.portfoliowatch.model.nasdaq.DividendProfile;
 import com.portfoliowatch.model.nasdaq.ResponseData;
 import com.portfoliowatch.model.nasdaq.StockInfo;
+import com.portfoliowatch.model.nasdaq.Summary;
+import com.portfoliowatch.model.nasdaq.SummaryData;
 import com.portfoliowatch.util.DateGsonTypeAdapter;
 import com.portfoliowatch.util.DoubleGsonTypeAdapter;
 import com.portfoliowatch.util.LongGsonTypeAdapter;
@@ -46,6 +48,8 @@ public final class NasdaqAPI {
     private static final Type companyProfileResponseType = new TypeToken<ResponseData<CompanyProfile>>(){}.getType();
 
     private static final Type infoResponseType = new TypeToken<ResponseData<StockInfo>>(){}.getType();
+
+    private static final Type summaryResponseType = new TypeToken<ResponseData<Summary>>(){}.getType();
 
     private static final RequestConfig config = RequestConfig.custom()
             .setConnectTimeout(6000)
@@ -96,6 +100,25 @@ public final class NasdaqAPI {
             // attempt for an etf asset class
             url = String.format("https://api.nasdaq.com/api/quote/%s/info?assetclass=etf", symbol.toUpperCase());
             response = GSON.fromJson(performGet(url), infoResponseType);
+        }
+        return response.getData();
+    }
+
+    /**
+     *
+     * @param symbol The symbol to look up.
+     * @return A Info data object.
+     * @throws IOException Throws an exception from REST request.
+     */
+    @Cacheable("summary" )
+    public static Summary getSummary(String symbol) throws IOException {
+        String url = String.format("https://api.nasdaq.com/api/quote/%s/summary?assetclass=stocks", symbol.toUpperCase());
+        String dataStr = performGet(url);
+        ResponseData<Summary> response = GSON.fromJson(dataStr, summaryResponseType);
+        if (response.getData() == null) {
+            // attempt for an etf asset class
+            url = String.format("https://api.nasdaq.com/api/quote/%s/summary?assetclass=etf", symbol.toUpperCase());
+            response = GSON.fromJson(performGet(url), summaryResponseType);
         }
         return response.getData();
     }

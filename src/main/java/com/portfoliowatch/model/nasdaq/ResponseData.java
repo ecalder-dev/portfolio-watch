@@ -1,9 +1,8 @@
 package com.portfoliowatch.model.nasdaq;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Setter @Getter
+@Data
 public class ResponseData<T> {
         private T data;
         private String message;

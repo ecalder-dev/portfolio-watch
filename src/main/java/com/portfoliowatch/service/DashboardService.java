@@ -6,6 +6,8 @@ import com.portfoliowatch.model.entity.Company;
 import com.portfoliowatch.model.entity.WatchedSymbol;
 import com.portfoliowatch.model.nasdaq.InfoData;
 import com.portfoliowatch.model.nasdaq.StockInfo;
+import com.portfoliowatch.model.nasdaq.Summary;
+import com.portfoliowatch.model.nasdaq.SummaryData;
 import com.portfoliowatch.util.NumberParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -55,14 +57,21 @@ public class DashboardService {
             if (stockInfo == null) {
                 continue;
             }
-            InfoData infoData = stockInfo.getPrimaryData() != null ? stockInfo.getPrimaryData() : stockInfo.getSecondaryData();
+            Summary summary = NasdaqAPI.getSummary(symbol);
+            InfoData infoData = stockInfo.getPrimaryData() != null &&
+                    !stockInfo.getPrimaryData().getLastTradeTimestamp().contains("AFTER HOURS") ?
+                    stockInfo.getPrimaryData() : stockInfo.getSecondaryData();
+
             if (infoData != null) {
                 quoteDto.setPercentChange(NumberParser.parseDouble(infoData.getPercentageChange()));
                 quoteDto.setDollarChange(NumberParser.parseDouble(infoData.getNetChange()));
                 quoteDto.setCurrentPrice(NumberParser.parseDouble(infoData.getLastSalePrice()));
             }
-            if (stockInfo.getKeyStats() != null && stockInfo.getKeyStats().getVolume() != null) {
-                quoteDto.setAverageVolume(NumberParser.parseLong(stockInfo.getKeyStats().getVolume().getValue()));
+            if (summary != null && summary.getSummaryData() != null) {
+                String avgVolStr = summary.getSummaryData().getAverageVolume() != null ?
+                        summary.getSummaryData().getAverageVolume().getValue() : summary.getSummaryData().getAvgDailyVol20Days().getValue();
+                Long avgVol = NumberParser.parseLong(avgVolStr);
+                quoteDto.setAverageVolume(avgVol);
             }
             quoteDto.setCompanyName(company != null ? company.getName() : stockInfo.getCompanyName());
             quoteDto.setIndustry(company != null && company.getIndustry() != null ? company.getIndustry() : "ETF");
