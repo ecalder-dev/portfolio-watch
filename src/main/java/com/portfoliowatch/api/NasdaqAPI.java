@@ -8,7 +8,6 @@ import com.portfoliowatch.model.nasdaq.DividendProfile;
 import com.portfoliowatch.model.nasdaq.ResponseData;
 import com.portfoliowatch.model.nasdaq.StockInfo;
 import com.portfoliowatch.model.nasdaq.Summary;
-import com.portfoliowatch.model.nasdaq.SummaryData;
 import com.portfoliowatch.util.DateGsonTypeAdapter;
 import com.portfoliowatch.util.DoubleGsonTypeAdapter;
 import com.portfoliowatch.util.LongGsonTypeAdapter;

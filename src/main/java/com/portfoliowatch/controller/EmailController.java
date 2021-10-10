@@ -1,19 +1,19 @@
 package com.portfoliowatch.controller;
 
 import com.portfoliowatch.service.EmailService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@RequestMapping("/email")
+@AllArgsConstructor
 @RestController
 public class EmailController {
 
-    @Autowired
-    EmailService emailService;
+    private final EmailService emailService;
 
-    @GetMapping("")
+    @PostMapping("/email")
     public ResponseEntity<String> email() {
         ResponseEntity<String> responseEntity;
         try {

@@ -7,6 +7,7 @@ import com.portfoliowatch.model.dto.CostBasisDto;
 import com.portfoliowatch.model.nasdaq.DividendProfile;
 import com.portfoliowatch.repository.AccountRepository;
 import com.portfoliowatch.model.dto.LotList;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.math3.util.Precision;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +22,12 @@ import java.util.Map;
 
 @Slf4j
 @Service
+@AllArgsConstructor
 public class AccountService {
 
-    @Autowired
-    private AccountRepository accountRepository;
+    private final AccountRepository accountRepository;
 
-    @Autowired
-    private TransactionService transactionService;
+    private final TransactionService transactionService;
 
     public Account createAccount(Account account) {
         account.setAccountId(null);

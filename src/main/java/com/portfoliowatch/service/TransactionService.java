@@ -5,6 +5,7 @@ import com.portfoliowatch.repository.TransactionRepository;
 import com.portfoliowatch.model.dto.Lot;
 import com.portfoliowatch.model.dto.LotList;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.math3.util.Precision;
 import org.slf4j.Logger;
@@ -22,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+@Slf4j
 @Service
 public class TransactionService {
 

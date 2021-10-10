@@ -1,27 +1,30 @@
 package com.portfoliowatch.controller;
 
 import com.portfoliowatch.model.entity.WatchedSymbol;
-import com.portfoliowatch.service.WatchedService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.portfoliowatch.repository.WatchedRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@RequestMapping("/api")
+@AllArgsConstructor
 @RestController
 public class WatchedController {
 
-    @Autowired
-    WatchedService watchedSymbolService;
+    WatchedRepository watchedRepository;
 
     @GetMapping("/watch")
     public ResponseEntity<List<WatchedSymbol>> getWatching() {
         List<WatchedSymbol> data;
         HttpStatus httpStatus;
         try {
-            data = watchedSymbolService.getAllWatchedSymbols();
+            data = watchedRepository.findAll();
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             data = null;
@@ -35,7 +38,7 @@ public class WatchedController {
         WatchedSymbol data;
         HttpStatus httpStatus;
         try {
-            data = watchedSymbolService.createWatchedSymbol(symbol);
+            data = watchedRepository.save(WatchedSymbol.builder().symbol(symbol).build());
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             data = null;
@@ -47,15 +50,11 @@ public class WatchedController {
 
     @DeleteMapping("/watching")
     public ResponseEntity<Boolean> deleteWatching(@RequestParam String symbol) {
-        boolean data;
-        HttpStatus httpStatus;
         try {
-            data = watchedSymbolService.deleteWatchedSymbol(symbol);
-            httpStatus = HttpStatus.OK;
+            watchedRepository.deleteById(symbol);
+            return ResponseEntity.ok(true);
         } catch (Exception e) {
-            data = false;
-            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+            return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(data, httpStatus);
     }
 }

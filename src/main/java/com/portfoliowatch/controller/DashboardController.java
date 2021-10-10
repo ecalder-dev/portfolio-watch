@@ -1,12 +1,11 @@
 package com.portfoliowatch.controller;
 
+import com.portfoliowatch.api.WallStreetJournalAPI;
 import com.portfoliowatch.model.dto.QuoteDto;
 import com.portfoliowatch.model.wsj.WSJInstrument;
 import com.portfoliowatch.service.DashboardService;
-import com.portfoliowatch.api.WallStreetJournalAPI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,14 +14,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@RequestMapping("/api/dashboard")
+@RequestMapping("/dashboard")
+@Slf4j
+@AllArgsConstructor
 @RestController
 public class DashboardController {
 
-    private static final Logger logger = LoggerFactory.getLogger(DashboardController.class);
-
-    @Autowired
-    private DashboardService portfolioStatsService;
+    private final DashboardService portfolioStatsService;
 
     @GetMapping("quotes")
     public ResponseEntity<List<QuoteDto>> getQuoteList() {
@@ -33,7 +31,7 @@ public class DashboardController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             data = null;
-            logger.error(e.getLocalizedMessage(), e);
+            log.error(e.getLocalizedMessage(), e);
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         }
         return new ResponseEntity<>(data, httpStatus);
@@ -48,7 +46,7 @@ public class DashboardController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             data = null;
-            logger.error(e.getLocalizedMessage(), e);
+            log.error(e.getLocalizedMessage(), e);
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         }
         return new ResponseEntity<>(data, httpStatus);

@@ -1,22 +1,27 @@
 package com.portfoliowatch.controller;
 
+import com.portfoliowatch.model.dto.Lot;
 import com.portfoliowatch.model.entity.Transaction;
 import com.portfoliowatch.service.TransactionService;
-import com.portfoliowatch.model.dto.Lot;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
 
-@RequestMapping("/api")
+@AllArgsConstructor
 @RestController
 public class TransactionController {
 
-    @Autowired
-    TransactionService transactionService;
+    private final TransactionService transactionService;
 
     @PostMapping("/transaction")
     public ResponseEntity<Transaction> createTransaction(@RequestBody Transaction transaction) {

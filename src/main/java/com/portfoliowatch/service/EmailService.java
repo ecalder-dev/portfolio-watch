@@ -1,8 +1,6 @@
 package com.portfoliowatch.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -10,12 +8,10 @@ import org.springframework.stereotype.Service;
 import javax.mail.internet.MimeMessage;
 
 @Service
+@AllArgsConstructor
 public class EmailService {
 
-    private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
-
-    @Autowired
-    private JavaMailSender emailSender;
+    private final JavaMailSender emailSender;
 
     public void sendReport(String to) throws Exception {
         MimeMessage message = emailSender.createMimeMessage();

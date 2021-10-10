@@ -7,9 +7,9 @@ import com.portfoliowatch.model.entity.WatchedSymbol;
 import com.portfoliowatch.model.nasdaq.InfoData;
 import com.portfoliowatch.model.nasdaq.StockInfo;
 import com.portfoliowatch.model.nasdaq.Summary;
-import com.portfoliowatch.model.nasdaq.SummaryData;
+import com.portfoliowatch.repository.WatchedRepository;
 import com.portfoliowatch.util.NumberParser;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -21,16 +21,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class DashboardService {
 
-    @Autowired
-    private TransactionService transactionService;
+    private final TransactionService transactionService;
 
-    @Autowired
-    private WatchedService watchedSymbolService;
+    private final WatchedRepository watchedRepository;
 
-    @Autowired
-    private CompanyService companyService;
+    private final CompanyService companyService;
 
     /**
      * Gets a list of Summaries.
@@ -41,7 +39,7 @@ public class DashboardService {
     public List<QuoteDto> getQuoteList() throws IOException {
         List<QuoteDto> quoteDtos = new ArrayList<>();
 
-        Set<String> symbols = watchedSymbolService.getAllWatchedSymbols().stream().map(WatchedSymbol::getSymbol).collect(Collectors.toSet());
+        Set<String> symbols = watchedRepository.findAll().stream().map(WatchedSymbol::getSymbol).collect(Collectors.toSet());
         Set<String> equityOwned = transactionService.getEquityOwned();
         symbols.addAll(transactionService.getEquityOwned());
 

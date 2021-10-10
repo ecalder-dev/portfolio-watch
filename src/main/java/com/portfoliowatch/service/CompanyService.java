@@ -4,8 +4,8 @@ import com.portfoliowatch.api.NasdaqAPI;
 import com.portfoliowatch.model.entity.Company;
 import com.portfoliowatch.model.nasdaq.CompanyProfile;
 import com.portfoliowatch.repository.CompanyRepository;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -16,10 +16,10 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@AllArgsConstructor
 public class CompanyService {
 
-    @Autowired
-    private CompanyRepository companyRepository;
+    private final CompanyRepository companyRepository;
 
     /**
      * Gets all companies from database.
