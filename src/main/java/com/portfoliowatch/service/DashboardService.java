@@ -10,6 +10,8 @@ import com.portfoliowatch.model.nasdaq.Summary;
 import com.portfoliowatch.repository.WatchedRepository;
 import com.portfoliowatch.util.NumberParser;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @AllArgsConstructor
 public class DashboardService {
 
@@ -71,10 +74,16 @@ public class DashboardService {
                 Long avgVol = NumberParser.parseLong(avgVolStr);
                 quoteDto.setAverageVolume(avgVol);
             }
-            quoteDto.setCompanyName(company != null ? company.getName() : stockInfo.getCompanyName());
-            quoteDto.setIndustry(company != null && company.getIndustry() != null ? company.getIndustry() : "ETF");
-            quoteDto.setSector(company != null && company.getSector() != null ? company.getSector() : "ETF");
-            quoteDto.setIsEtf(quoteDto.getIndustry().equals("ETF"));
+            if (company != null) {
+                quoteDto.setCompanyName(company.getName());
+                if (!StringUtils.isBlank(company.getIndustry())) {
+                    quoteDto.setIndustry(company.getIndustry());
+                    quoteDto.setSector(company.getSector());
+                }
+            } else if (stockInfo.getAssetClass().equalsIgnoreCase("ETF")){
+                quoteDto.setIndustry("ETF");
+                quoteDto.setSector("ETF");
+            }
             quoteDto.setIsOwned(equityOwned.contains(symbol));
             quoteDtos.add(quoteDto);
         }

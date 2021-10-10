@@ -8,5 +8,5 @@ public class CostBasisDto {
     private LotList lotList;
     private Double adjustedPrice;
     private Double totalShares;
-    private Double totalAnnualDividend;
+    private Double totalAnnualDividends;
 }

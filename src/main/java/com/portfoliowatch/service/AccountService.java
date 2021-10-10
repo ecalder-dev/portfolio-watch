@@ -10,7 +10,6 @@ import com.portfoliowatch.model.dto.LotList;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.math3.util.Precision;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -78,9 +77,9 @@ public class AccountService {
             costBasisDto.setLotList(lotList);
             costBasisDto.setTotalShares(Precision.round(lotList.getTotalShares(), 2));
             costBasisDto.setAdjustedPrice(Precision.round(lotList.getTotalPrice() / lotList.getTotalShares(), 4));
-            costBasisDto.setTotalAnnualDividend(lotList.getTotalShares() * dividendProfile.getAnnualizedDividend());
+            costBasisDto.setTotalAnnualDividends(lotList.getTotalShares() * dividendProfile.getAnnualizedDividend());
             costBasisDtoList.add(costBasisDto);
-            account.setTotalAnnualDividends(account.getTotalAnnualDividends() + costBasisDto.getTotalAnnualDividend());
+            account.setTotalAnnualDividends(account.getTotalAnnualDividends() + costBasisDto.getTotalAnnualDividends());
         }
         account.setCostBasisList(costBasisDtoList);
     }
