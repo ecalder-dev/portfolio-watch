@@ -60,11 +60,6 @@
             <version>1.1.1</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-mail</artifactId>
-            <version>3.0.0</version>
-        </dependency>
-        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.10</version>
@@ -122,5 +117,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
