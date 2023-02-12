@@ -1,4 +1,4 @@
-package com.portfoliowatch.util;
+package com.portfoliowatch.util.parser;
 
 public final class NumberParser {
 

@@ -39,11 +39,11 @@ public class AccountController {
     }
     
     @GetMapping("/accounts")
-    public ResponseEntity<List<Account>> readAllAccounts(@RequestParam(required = false) boolean withDetails) {
+    public ResponseEntity<List<Account>> readAllAccounts() {
         List<Account> data;
         HttpStatus httpStatus;
         try {
-            data = accountService.readAllAccounts(withDetails);
+            data = accountService.readAllAccounts();
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             data = null;

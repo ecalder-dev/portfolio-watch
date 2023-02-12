@@ -1,4 +1,4 @@
-package com.portfoliowatch.api;
+package com.portfoliowatch.service.thirdparty;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -8,9 +8,9 @@ import com.portfoliowatch.model.nasdaq.DividendProfile;
 import com.portfoliowatch.model.nasdaq.ResponseData;
 import com.portfoliowatch.model.nasdaq.StockInfo;
 import com.portfoliowatch.model.nasdaq.Summary;
-import com.portfoliowatch.util.DateGsonTypeAdapter;
-import com.portfoliowatch.util.DoubleGsonTypeAdapter;
-import com.portfoliowatch.util.LongGsonTypeAdapter;
+import com.portfoliowatch.util.adapter.DateGsonTypeAdapter;
+import com.portfoliowatch.util.adapter.DoubleGsonTypeAdapter;
+import com.portfoliowatch.util.adapter.LongGsonTypeAdapter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.config.CookieSpecs;

@@ -1,6 +1,6 @@
 package com.portfoliowatch.config;
 
-import com.portfoliowatch.service.TransactionService;
+import com.portfoliowatch.service.PortfolioService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
@@ -20,21 +20,8 @@ public class SchedulerConfig {
     @Autowired
     private CacheManager cacheManager;
 
-    @Autowired
-    private TransactionService transactionService;
-
-    private final List<String> every30MinuteCache;
-
-    public SchedulerConfig() {
-        every30MinuteCache = new ArrayList<>();
-        every30MinuteCache.add("quote-list");
-
-        log.info("Clearing cache for: quote-list");
-    }
-
     @Scheduled(cron = "0 0 0 ? * MON-SUN", zone="GMT+5.00")
     public void nightlyJobs() {
-        transactionService.generateAccountLotListMap();
         for(String name : cacheManager.getCacheNames()){
             Cache cache = cacheManager.getCache(name);
             if (cache != null) {
@@ -43,21 +30,4 @@ public class SchedulerConfig {
             }
         }
     }
-
-    @Scheduled(cron = "0 0/15 * * * ?", zone="GMT+5.00")
-    public void every30MinutesJob() {
-        for(String name : every30MinuteCache){
-            Cache cache = cacheManager.getCache(name);
-            if (cache != null) {
-                log.info("Clearing cache for: {}", name);
-                cache.clear();
-            }
-        }
-    }
-
-    @Scheduled(cron = "0 0 12 ? * MON-SUN", zone="GMT+5.00")
-    public void noonJobs() {
-        transactionService.generateAccountLotListMap();
-    }
-
 }

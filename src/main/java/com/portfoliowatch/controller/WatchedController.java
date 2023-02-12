@@ -17,7 +17,7 @@ import java.util.List;
 @RestController
 public class WatchedController {
 
-    WatchedRepository watchedRepository;
+    private WatchedRepository watchedRepository;
 
     @GetMapping("/watch")
     public ResponseEntity<List<WatchedSymbol>> getWatching() {

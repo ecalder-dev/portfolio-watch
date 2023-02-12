@@ -1,4 +1,4 @@
-package com.portfoliowatch.util;
+package com.portfoliowatch.util.adapter;
 
 import com.google.gson.TypeAdapter;
 import com.google.gson.internal.bind.util.ISO8601Utils;

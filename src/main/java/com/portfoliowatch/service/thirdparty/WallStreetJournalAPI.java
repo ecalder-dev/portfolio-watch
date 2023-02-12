@@ -1,4 +1,4 @@
-package com.portfoliowatch.api;
+package com.portfoliowatch.service.thirdparty;
 
 import com.google.gson.Gson;
 import com.portfoliowatch.model.wsj.WSJId;
