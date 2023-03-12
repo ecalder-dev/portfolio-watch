@@ -1,10 +1,11 @@
 package com.portfoliowatch.model.nasdaq;
 
 import com.google.gson.annotations.SerializedName;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter @Setter
+@Data
 public class CompanyProfile {
 
     @SerializedName("ModuleTitle")

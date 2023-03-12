@@ -1,4 +1,4 @@
-package com.portfoliowatch.util;
+package com.portfoliowatch.util.adapter;
 
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
@@ -21,14 +21,13 @@ public class DoubleGsonTypeAdapter extends TypeAdapter<Double> {
     public Double read(JsonReader jsonReader) throws IOException {
         if (jsonReader.peek() == JsonToken.NULL) {
             jsonReader.nextNull();
-            return null;
+            return 0.0;
         }
         String stringValue = jsonReader.nextString();
         try {
-            Double value = Double.valueOf(stringValue);
-            return value;
+            return Double.valueOf(stringValue);
         } catch (NumberFormatException e) {
-            return null;
+            return 0.0;
         }
     }
 }

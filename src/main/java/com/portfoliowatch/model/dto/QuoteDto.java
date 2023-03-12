@@ -17,5 +17,4 @@ public class QuoteDto {
     private String industry;
     private String sector;
     private Boolean isEtf;
-    private Boolean isOwned;
 }

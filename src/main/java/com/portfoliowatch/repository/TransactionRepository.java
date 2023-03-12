@@ -1,6 +1,6 @@
 package com.portfoliowatch.repository;
 
-import com.portfoliowatch.model.dbo.Transaction;
+import com.portfoliowatch.model.entity.Transaction;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

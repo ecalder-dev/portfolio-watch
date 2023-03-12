@@ -1,19 +1,23 @@
-package com.portfoliowatch.model.dbo;
+package com.portfoliowatch.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.portfoliowatch.model.dto.CostBasisDto;
-import com.portfoliowatch.util.LotList;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
-@Getter @Setter
-@Entity @ToString
+@Data
+@Entity
 @Table(name = "accounts")
 public class Account {
 
@@ -43,4 +47,8 @@ public class Account {
     @Transient
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<CostBasisDto> costBasisList;
+
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private double totalAnnualDividends;
 }

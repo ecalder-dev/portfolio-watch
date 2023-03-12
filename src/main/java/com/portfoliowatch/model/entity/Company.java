@@ -1,8 +1,6 @@
-package com.portfoliowatch.model.dbo;
+package com.portfoliowatch.model.entity;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,10 +8,8 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Table;
 
-@Getter
-@Setter
+@Data
 @Entity
-@ToString
 @Table(name = "company")
 public class Company {
 

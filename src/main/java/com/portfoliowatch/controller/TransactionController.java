@@ -1,22 +1,25 @@
 package com.portfoliowatch.controller;
 
-import com.portfoliowatch.model.dbo.Transaction;
+import com.portfoliowatch.model.entity.Transaction;
 import com.portfoliowatch.service.TransactionService;
-import com.portfoliowatch.util.Lot;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
 
-@RequestMapping("/api")
+@AllArgsConstructor
 @RestController
 public class TransactionController {
 
-    @Autowired
-    TransactionService transactionService;
+    private final TransactionService transactionService;
 
     @PostMapping("/transaction")
     public ResponseEntity<Transaction> createTransaction(@RequestBody Transaction transaction) {
@@ -37,7 +40,7 @@ public class TransactionController {
         List<Transaction> data;
         HttpStatus httpStatus;
         try {
-            data = transactionService.readAllTransactions(null);
+            data = transactionService.getAllTransactions(null);
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             data = null;
@@ -51,7 +54,7 @@ public class TransactionController {
         Transaction data;
         HttpStatus httpStatus;
         try {
-            data = transactionService.readTransactionById(id);
+            data = transactionService.getTransactionById(id);
             httpStatus = data == null ? HttpStatus.NOT_FOUND : HttpStatus.OK;
         } catch (Exception e) {
             data = null;
@@ -92,9 +95,8 @@ public class TransactionController {
         return new ResponseEntity<>(data, httpStatus);
     }
 
-    @GetMapping("/transaction/cost-basis")
-    public ResponseEntity<Map<String, Lot>> getSymbolAggregatedCostBasisMap() {
-        Map<String, Lot> data = transactionService.getSymbolAggregatedCostBasisMap();
-        return new ResponseEntity<>(data, HttpStatus.OK);
+    @GetMapping("/regenerateTransactions")
+    public void generateAccountLotListMap() {
+        transactionService.performAllRecordedTransactions();
     }
 }

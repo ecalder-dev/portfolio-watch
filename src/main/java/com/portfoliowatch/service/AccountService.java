@@ -1,31 +1,25 @@
 package com.portfoliowatch.service;
 
-import com.portfoliowatch.model.dbo.Account;
-import com.portfoliowatch.model.dbo.Transaction;
-import com.portfoliowatch.model.dto.CostBasisDto;
+import com.portfoliowatch.model.entity.Account;
+import com.portfoliowatch.model.entity.Transaction;
 import com.portfoliowatch.repository.AccountRepository;
-import com.portfoliowatch.util.LotList;
-import org.apache.commons.math3.util.Precision;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
+@Slf4j
 @Service
+@AllArgsConstructor
 public class AccountService {
 
-    private static final Logger logger = LoggerFactory.getLogger(AccountService.class);
+    private final AccountRepository accountRepository;
 
-    @Autowired
-    private AccountRepository accountRepository;
+    private final PortfolioService costBasisService;
 
-    @Autowired
-    private TransactionService transactionService;
+    private final TransactionService transactionService;
 
     public Account createAccount(Account account) {
         account.setAccountId(null);
@@ -34,13 +28,8 @@ public class AccountService {
         return accountRepository.save(account);
     }
 
-    public List<Account> readAllAccounts(boolean withDetails) {
+    public List<Account> readAllAccounts() {
         List<Account> accounts = accountRepository.findAll();
-        if (withDetails) {
-            for (Account account: accounts) {
-                this.insertCostBasisInfo(account);
-            }
-        }
         return accounts;
     }
 
@@ -50,7 +39,7 @@ public class AccountService {
     }
 
     public boolean deleteAccount(Account account) {
-        List<Transaction> transactions = transactionService.readAllTransactions(null);
+        List<Transaction> transactions = transactionService.getAllTransactions(null);
         if (transactions.isEmpty()) {
             accountRepository.delete(account);
         } else {
@@ -58,20 +47,4 @@ public class AccountService {
         }
         return true;
     }
-
-    public void insertCostBasisInfo(Account account) {
-        Map<String, LotList> symbols = transactionService.getAccountLotListMap().get(account.getAccountId());
-        List<CostBasisDto> costBasisDtoList = new ArrayList<>();
-        for (Map.Entry<String, LotList> keypair: symbols.entrySet()) {
-            LotList lotList = keypair.getValue();
-            CostBasisDto costBasisDto = new CostBasisDto();
-            costBasisDto.setSymbol(keypair.getKey());
-            costBasisDto.setLotList(lotList);
-            costBasisDto.setTotalShares(Precision.round(lotList.getTotalShares(), 2));
-            costBasisDto.setAdjustedPrice(Precision.round(lotList.getTotalPrice() / lotList.getTotalShares(), 4));
-            costBasisDtoList.add(costBasisDto);
-        }
-        account.setCostBasisList(costBasisDtoList);
-    }
-
 }

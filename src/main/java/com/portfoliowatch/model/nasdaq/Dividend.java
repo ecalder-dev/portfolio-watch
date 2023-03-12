@@ -15,8 +15,4 @@ public class Dividend {
     private String recordDate;
     private String paymentDate;
 
-    public void setAmount(String amount) {
-        this.amount = 1.0;
-    }
-
 }
