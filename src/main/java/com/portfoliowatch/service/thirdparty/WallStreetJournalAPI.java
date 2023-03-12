@@ -14,13 +14,19 @@ import org.apache.http.util.EntityUtils;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 public final class WallStreetJournalAPI {
 
     private static final Gson GSON = new Gson();
 
+    private static final List<WSJInstrument> cachedWSJInstrument = new ArrayList<>();
+
     public static List<WSJInstrument> getIndices() throws URISyntaxException, IOException {
+        if (!cachedWSJInstrument.isEmpty()) {
+            return cachedWSJInstrument;
+        }
         String SRV_TYPE = "mdc_quotes";
         String INDEX_URL = "https://www.wsj.com/market-data/stocks/us/indexes";
         List<WSJInstrument> responseData = null;
@@ -45,10 +51,20 @@ public final class WallStreetJournalAPI {
                 WSJResponse instrumentResponse = GSON.fromJson(responseStr, WSJResponse.class);
                 if (instrumentResponse.getData() != null) {
                     responseData = instrumentResponse.getData().getInstruments();
+                    cachedWSJInstrument.addAll(responseData);
+                } else {
+                    cachedWSJInstrument.clear();
                 }
             }
         }
         return responseData;
+    }
+
+    /**
+     * Resets cache.
+     */
+    public static void clearCache() {
+        cachedWSJInstrument.clear();
     }
 
 }

@@ -1,7 +1,6 @@
 package com.portfoliowatch.controller;
 
 import com.portfoliowatch.model.entity.Transaction;
-import com.portfoliowatch.service.PortfolioService;
 import com.portfoliowatch.service.TransactionService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;

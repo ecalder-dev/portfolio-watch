@@ -31,8 +31,7 @@ public class QuotesService {
      *
      * @return A list of Summaries
      */
-    @Cacheable("quote-list")
-    public List<QuoteDto> getQuotes(Set<String> symbols) throws IOException {
+    public List<QuoteDto> getQuotes(Set<String> symbols) throws IOException, InterruptedException {
         List<QuoteDto> quoteDtoList = new ArrayList<>();
         Map<String, StockInfo> infoMap = NasdaqAPI.getAllInfo(symbols);
         List<Company> companyList = this.companyService.getCompanies(symbols);
@@ -55,7 +54,8 @@ public class QuotesService {
      *
      * @return The quote
      */
-    public QuoteDto getQuote(String symbol) throws IOException {
+    @Cacheable("quote")
+    public QuoteDto getQuote(String symbol) throws IOException, InterruptedException {
         StockInfo stockInfo = NasdaqAPI.getInfo(symbol);
         Summary summary = NasdaqAPI.getSummary(symbol);
         Company company = this.companyService.getCompany(symbol);

@@ -326,4 +326,12 @@ public class PortfolioService {
         lotService.deleteAllLots();
     }
 
+    /**
+     * Gets all the owned symbols.
+     * @return A set of symbols in string.
+     */
+    public Set<String> getOwnedSymbols() {
+        return lotService.getAllUniqueSymbols();
+    }
+
 }

@@ -17,18 +17,18 @@ import java.util.Set;
 public class LotService {
 
     private final LotRepository lotRepository;
-    private final Sort sortByTransactionDateAsc = Sort.by(Sort.Direction.ASC, "dateTransacted");
+    private final Sort sortByTransactionDate = Sort.by(Sort.Direction.DESC, "dateTransacted");
 
     public List<Lot> getAllLots() {
-        return lotRepository.findAll(sortByTransactionDateAsc);
+        return lotRepository.findAll(sortByTransactionDate);
     }
 
     public List<Lot> getAllLotsBySymbol(String symbol) {
-        return lotRepository.findAllBySymbol(sortByTransactionDateAsc, symbol);
+        return lotRepository.findAllBySymbol(sortByTransactionDate, symbol);
     }
 
     public List<Lot> getAllLotsBySymbolAndAccount(String symbol, Account account) {
-        return lotRepository.findAllBySymbolAndAccount(sortByTransactionDateAsc, symbol, account);
+        return lotRepository.findAllBySymbolAndAccount(sortByTransactionDate, symbol, account);
     }
 
     public Lot createLot(Lot lot) {

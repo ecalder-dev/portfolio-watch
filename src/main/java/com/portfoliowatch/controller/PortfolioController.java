@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Set;
 
 @RequestMapping("/portfolio")
 @Slf4j
@@ -25,7 +26,22 @@ public class PortfolioController {
         List<CostBasisDto> data;
         HttpStatus httpStatus;
         try {
-            data = portfolioService.getCostBasisList(false);
+            data = portfolioService.getCostBasisList(true);
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            data = null;
+            log.error(e.getLocalizedMessage(), e);
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+        return new ResponseEntity<>(data, httpStatus);
+    }
+
+    @GetMapping("owned")
+    public ResponseEntity<Set<String>> getOwnedSymbols() {
+        Set<String> data;
+        HttpStatus httpStatus;
+        try {
+            data = portfolioService.getOwnedSymbols();
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             data = null;
