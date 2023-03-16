@@ -18,16 +18,14 @@ public class SchedulerConfig {
     @Autowired
     private CacheManager cacheManager;
 
-    private NasdaqAPI nasdaqAPI;
-
-    @Scheduled(cron = "0 0 0 ? * MON-SUN", zone="GMT+5.00")
-    public void nightlyJobs() {
+    @Scheduled(cron = "0 0 * * * *", zone="GMT+5.00")
+    public void clearCache() {
+        log.info("Clearing cache.");
+        NasdaqAPI.clearCache();
+        WallStreetJournalAPI.clearCache();
         for(String name : cacheManager.getCacheNames()){
             Cache cache = cacheManager.getCache(name);
             if (cache != null) {
-                log.info("Clearing cache for: {}", name);
-                NasdaqAPI.clearCache();
-                WallStreetJournalAPI.clearCache();
                 cache.clear();
             }
         }
