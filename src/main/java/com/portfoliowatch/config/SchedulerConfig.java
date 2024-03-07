@@ -18,7 +18,7 @@ public class SchedulerConfig {
     @Autowired
     private CacheManager cacheManager;
 
-    @Scheduled(cron = "* */30 * * * MON-FRI", zone="GMT+5.00")
+    @Scheduled(cron = " */60 * * * MON-FRI", zone="GMT+5.00")
     public void clearCache() {
         log.info("Clearing cache.");
         NasdaqAPI.clearCache();
