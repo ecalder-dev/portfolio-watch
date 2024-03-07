@@ -221,6 +221,7 @@ public class PortfolioService {
             double newShares = Precision.round(lot.getShares() * multiplier, 4);
             double newPrice = Precision.round(lot.getPrice() / multiplier, 4);
             beforeTotal += newShares;
+            lot.setShares(newShares);
             lot.setPrice(newPrice);
         }
         lotService.createLots(affectedLots);
