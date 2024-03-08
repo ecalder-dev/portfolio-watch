@@ -182,20 +182,21 @@ public class PortfolioService {
      * @param transaction The transaction being performed.
      */
     private void doMerger(Transaction transaction) {
-        List<Lot> affectedLots = lotService.getAllLotsBySymbolAndAccount(transaction.getSymbol(), transaction.getAccount());
+        List<Lot> affectedLots = lotService.getAllLotsBySymbol(transaction.getSymbol());
         double multiplier = getMultiplierFromRatio(transaction.getRatio());
         double shareCount = 0;
+        double partials = 0;
         for (Lot lot : affectedLots) {
             double multipliedShare = Precision.round(lot.getShares() * multiplier, 4);
             double newPrice = Precision.round((lot.getPrice() * lot.getShares()) / multipliedShare, 4);
             shareCount += multipliedShare;
-            lot.setShares(multipliedShare);
+            partials += multipliedShare % 1;
+            lot.setShares(multipliedShare - (multipliedShare % 1));
             lot.setPrice(newPrice);
             lot.setDatetimeUpdated(new Date());
             lot.setSymbol(transaction.getNewSymbol());
         }
         lotService.createLots(affectedLots);
-        double partials = shareCount % 1;
         if (partials > 0) {
             Transaction sellTransaction = new Transaction();
             sellTransaction.setSymbol(transaction.getNewSymbol());
