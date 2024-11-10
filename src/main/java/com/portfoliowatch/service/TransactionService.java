@@ -1,15 +1,20 @@
 package com.portfoliowatch.service;
 
+import com.portfoliowatch.model.dto.TransactionDto;
+import com.portfoliowatch.model.entity.Account;
 import com.portfoliowatch.model.entity.Transaction;
+import com.portfoliowatch.repository.AccountRepository;
 import com.portfoliowatch.repository.TransactionRepository;
-import com.portfoliowatch.util.StockUtils;
+import com.portfoliowatch.util.ErrorHandler;
+import com.portfoliowatch.util.enums.TransactionType;
+import com.portfoliowatch.util.exception.NoDataException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -18,98 +23,73 @@ public class TransactionService {
 
     private final TransactionRepository transactionRepository;
 
-    private final PortfolioService portfolioService;
+    private final AccountRepository accountRepository;
 
-    /**
-     * Does all the transactions saved in database.
-     */
-    public void performAllRecordedTransactions() {
-        portfolioService.performTransactions(transactionRepository.findAllOrdered());
-    }
+    private final LotService lotService;
 
     /**
      * Reads a list of transactions.
-     * @param sort The order of sort.
      * @return List of transactions.
      */
-    public List<Transaction> getAllTransactions(Sort sort) {
-        if (sort != null) {
-            return transactionRepository.findAll(sort);
+    public List<TransactionDto> getAllTransactions() {
+        return transactionRepository.findAllOrdered().stream().map(TransactionDto::new).collect(Collectors.toList());
+    }
+
+    public TransactionDto getTransactionById(Long id) {
+        return transactionRepository.findById(id).map(TransactionDto::new).orElse(null);
+    }
+
+    public TransactionDto createTransaction(TransactionDto transactionDto) throws NoDataException {
+        ErrorHandler.validateNonNull(transactionDto, "TransactionDTO should not be null.");
+        ErrorHandler.validateNonNull(transactionDto.getSymbol(), "TransactionDTO's symbol should not be null.");
+        ErrorHandler.validateNonNull(transactionDto.getType(), "TransactionDTO's type should not be null.");
+        ErrorHandler.validateNonNull(transactionDto.getAccount(), "TransactionDTO's should not be null.");
+
+        Account account = accountRepository.findById(transactionDto.getAccount().getId())
+                .orElseThrow(() -> new NoDataException("Account not found with id " + transactionDto.getAccount().getId()));
+
+        Transaction transaction = transactionDto.generateTransaction(account);
+        Transaction savedTransaction = transactionRepository.save(transaction);
+        if (transaction.getType() == TransactionType.SELL) {
+            lotService.reduceLotsWith(transaction);
+        } else if (transaction.getType() == TransactionType.GIFT || transaction.getType() == TransactionType.BUY) {
+            lotService.createLotWith(transaction);
         } else {
-            return transactionRepository.findAll();
+            log.error("Transaction type not supported: " + transaction.getType());
         }
+        return new TransactionDto(savedTransaction);
     }
 
-    public Transaction getTransactionById(Long id) {
-        return transactionRepository.findById(id).orElse(null);
-    }
+    public TransactionDto updateTransaction(TransactionDto transactionDto) throws NoDataException {
 
-    public Transaction createTransaction(Transaction transaction) {
-        assert(transaction != null);
-        assert(transaction.getSymbol() != null);
-        assert(transaction.getType() != null);
-        switch(transaction.getType().toUpperCase()) {
-            case "M":
-                assert(StockUtils.isRatioValid(transaction.getRatio()));
-                assert(transaction.getNewSymbol() != null);
-                break;
-            case "SP":
-                assert(StockUtils.isRatioValid(transaction.getRatio()));
-                break;
-        }
-        transaction.setSymbol(transaction.getSymbol().toUpperCase());
-        transaction.setTransactionId(null);
+        ErrorHandler.validateNonNull(transactionDto, "TransactionDTO should not be null.");
+        ErrorHandler.validateNonNull(transactionDto.getSymbol(), "TransactionDTO's symbol should not be null.");
+        ErrorHandler.validateNonNull(transactionDto.getType(), "TransactionDTO's type should not be null.");
+        ErrorHandler.validateNonNull(transactionDto.getAccount(), "TransactionDTO's should not be null.");
+
+        Transaction transaction = transactionRepository.findById(transactionDto.getId())
+                .orElseThrow(() -> new NoDataException("Transaction not found with id " + transactionDto.getId()));
+        Account account = accountRepository.findById(transactionDto.getAccount().getId())
+                .orElseThrow(() -> new NoDataException("Account not found with id " + transactionDto.getAccount().getId()));
+
+        transaction.setPrice(transactionDto.getPrice());
+        transaction.setSymbol(transactionDto.getSymbol());
+        transaction.setShares(transactionDto.getShares());
+        transaction.setDateTransacted(transactionDto.getDateTransacted());
+        transaction.setType(transactionDto.getType());
+        transaction.setAccount(account);
         transaction.setDatetimeUpdated(new Date());
-        transaction.setDatetimeInserted(new Date());
-        this.setExecutionPriority(transaction);
         Transaction savedTransaction = transactionRepository.save(transaction);
-        portfolioService.performTransaction(transaction);
-        return savedTransaction;
+
+        lotService.rebuildAllLots();
+        return new TransactionDto(savedTransaction);
     }
 
-    public Transaction updateTransaction(Transaction transaction) {
-        assert(transaction != null);
-        assert(transaction.getTransactionId() != null);
-        assert(transaction.getSymbol() != null);
-        assert(transaction.getType() != null);
-        switch(transaction.getType().toUpperCase()) {
-            case "M":
-                assert(StockUtils.isRatioValid(transaction.getRatio()));
-                assert(transaction.getNewSymbol() != null);
-                break;
-            case "SP":
-                assert(StockUtils.isRatioValid(transaction.getRatio()));
-                break;
-        }
-        assert(transaction.getDatetimeInserted() != null);
-        transaction.setSymbol(transaction.getSymbol().toUpperCase());
-        transaction.setDatetimeUpdated(new Date());
-        this.setExecutionPriority(transaction);
-        Transaction savedTransaction = transactionRepository.save(transaction);
-        performAllRecordedTransactions();
-        return savedTransaction;
-    }
-
-    public boolean deleteTransaction(Transaction transaction) {
+    public void deleteTransaction(Long id) throws NoDataException {
+        Transaction transaction = transactionRepository.findById(id)
+                .orElseThrow(() -> new NoDataException("Transaction not found with id " + id));
         transactionRepository.delete(transaction);
-        performAllRecordedTransactions();
-        return true;
+        lotService.rebuildAllLots();
     }
 
-    private void setExecutionPriority(Transaction transaction) {
-        switch (transaction.getType().toUpperCase()) {
-            case "B": case "S":
-                transaction.setExecutionPriority(1);
-                break;
-            case "TO":
-                transaction.setExecutionPriority(2);
-                break;
-            case "TI":
-                transaction.setExecutionPriority(3);
-                break;
-            default:
-                transaction.setExecutionPriority(0);
-                break;
-        }
-    }
 }

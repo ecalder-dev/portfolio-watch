@@ -3,13 +3,14 @@ package com.portfoliowatch.controller;
 import com.portfoliowatch.model.dto.QuoteDto;
 import com.portfoliowatch.model.wsj.WSJInstrument;
 import com.portfoliowatch.service.QuotesService;
-import com.portfoliowatch.service.thirdparty.WallStreetJournalAPI;
+import com.portfoliowatch.service.third.WallStreetJournalAPI;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,12 +19,13 @@ import java.util.Set;
 
 @Slf4j
 @AllArgsConstructor
-@RestController
+@RequestMapping("/api")
+@RestController()
 public class QuotesController {
 
     private final QuotesService quotesService;
 
-    @GetMapping("quotes")
+    @GetMapping("/quotes")
     public ResponseEntity<List<QuoteDto>> getQuotes(@RequestParam Set<String> symbols) {
         List<QuoteDto> data;
         HttpStatus httpStatus;
@@ -38,7 +40,7 @@ public class QuotesController {
         return new ResponseEntity<>(data, httpStatus);
     }
 
-    @GetMapping("quote/{symbol}")
+    @GetMapping("/quotes/{symbol}")
     public ResponseEntity<QuoteDto> getQuote(@PathVariable("symbol") String symbol) {
         QuoteDto data;
         HttpStatus httpStatus;
@@ -53,7 +55,7 @@ public class QuotesController {
         return new ResponseEntity<>(data, httpStatus);
     }
 
-    @GetMapping("indices")
+    @GetMapping("/quotes/indices")
     public ResponseEntity<List<WSJInstrument>> getIndices() {
         List<WSJInstrument> data;
         HttpStatus httpStatus;

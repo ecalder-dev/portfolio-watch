@@ -1,7 +1,7 @@
 package com.portfoliowatch.config;
 
-import com.portfoliowatch.service.thirdparty.NasdaqAPI;
-import com.portfoliowatch.service.thirdparty.WallStreetJournalAPI;
+import com.portfoliowatch.service.third.NasdaqAPI;
+import com.portfoliowatch.service.third.WallStreetJournalAPI;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;

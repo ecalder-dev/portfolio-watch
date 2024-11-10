@@ -1,6 +1,6 @@
 package com.portfoliowatch.service;
 
-import com.portfoliowatch.service.thirdparty.NasdaqAPI;
+import com.portfoliowatch.service.third.NasdaqAPI;
 import com.portfoliowatch.model.entity.Company;
 import com.portfoliowatch.model.nasdaq.CompanyProfile;
 import com.portfoliowatch.repository.CompanyRepository;

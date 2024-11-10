@@ -15,6 +15,8 @@ public interface LotRepository extends JpaRepository<Lot, Long> {
 
     List<Lot> findAllBySymbol(Sort sort, String symbol);
 
+    List<Lot> findAllByAccount(Account account);
+
     List<Lot> findAllBySymbolAndAccount(Sort sort, String symbol, Account account);
 
     @Query("SELECT DISTINCT symbol FROM Lot")

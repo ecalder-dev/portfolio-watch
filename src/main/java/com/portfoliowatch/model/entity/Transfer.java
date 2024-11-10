@@ -1,6 +1,6 @@
 package com.portfoliowatch.model.entity;
 
-import com.portfoliowatch.model.entity.base.Base;
+import com.portfoliowatch.model.entity.base.AssetAction;
 import lombok.Data;
 
 import jakarta.persistence.Column;
@@ -8,36 +8,45 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Entity
-@Table(name = "accounts")
-public class Account implements Base {
+@Table(name = "transfer")
+public class Transfer implements AssetAction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "account_name", nullable = false)
-    private String accountName;
+    @Column(nullable = false, length = 5)
+    private String symbol;
 
-    @Column(name = "account_number")
-    private String accountNumber;
+    @Column
+    private Double shares;
 
-    @Column(name = "date_opened")
+    @Column(name = "date_transacted")
     @Temporal(TemporalType.DATE)
-    private Date dateOpened;
+    private Date dateTransacted;
 
-    @Column(name = "date_closed")
-    @Temporal(TemporalType.DATE)
-    private Date dateClosed;
+    @OneToMany
+    @JoinColumn(name = "fk_transfer_lot")
+    private List<Lot> lots;
 
-    @Column(name = "is_hidden")
-    private Boolean isHidden;
+    @OneToOne
+    @JoinColumn(name = "fk_transfer_old_account")
+    private Account oldAccount;
+
+    @OneToOne
+    @JoinColumn(name = "fk_transfer_new_account")
+    private Account newAccount;
 
     @Column(name = "datetime_created")
     @Temporal(TemporalType.TIMESTAMP)

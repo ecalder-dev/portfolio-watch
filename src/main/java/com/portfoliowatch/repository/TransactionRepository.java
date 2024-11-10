@@ -11,8 +11,8 @@ import java.util.List;
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
     @Query("SELECT t FROM Transaction t " +
-            "ORDER by t.dateTransacted ASC, t.executionPriority ASC, " +
-            "t.datetimeInserted ASC")
+            "ORDER by t.dateTransacted ASC, " +
+            "t.datetimeCreated ASC")
     List<Transaction> findAllOrdered();
 
 }
