@@ -3,10 +3,12 @@ package com.portfoliowatch.model.dto;
 import com.portfoliowatch.model.entity.CorporateAction;
 import com.portfoliowatch.util.enums.CorporateActionType;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
 @Data
+@NoArgsConstructor
 public class CorporateActionDto {
 
     private Long id;

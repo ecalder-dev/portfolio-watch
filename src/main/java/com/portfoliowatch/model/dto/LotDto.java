@@ -3,10 +3,12 @@ package com.portfoliowatch.model.dto;
 import com.portfoliowatch.model.entity.Account;
 import com.portfoliowatch.model.entity.Lot;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
 @Data
+@NoArgsConstructor
 public class LotDto {
 
     private Long id;

@@ -1,18 +1,15 @@
 package com.portfoliowatch.model.dto;
 
 import com.portfoliowatch.model.entity.Account;
-import com.portfoliowatch.model.entity.Lot;
 import com.portfoliowatch.model.entity.Transaction;
-import com.portfoliowatch.model.entity.Transfer;
 import com.portfoliowatch.util.enums.TransactionType;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Data
+@NoArgsConstructor
 public class TransactionDto {
 
     private Long id;

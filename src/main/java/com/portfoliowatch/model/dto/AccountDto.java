@@ -2,9 +2,12 @@ package com.portfoliowatch.model.dto;
 
 import com.portfoliowatch.model.entity.Account;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.Date;
 
 @Data
+@NoArgsConstructor
 public class AccountDto {
 
     private Long id;

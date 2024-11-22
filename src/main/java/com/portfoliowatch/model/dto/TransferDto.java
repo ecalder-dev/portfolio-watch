@@ -1,11 +1,10 @@
 package com.portfoliowatch.model.dto;
 
 import com.portfoliowatch.model.entity.Account;
-import com.portfoliowatch.model.entity.CorporateAction;
 import com.portfoliowatch.model.entity.Lot;
 import com.portfoliowatch.model.entity.Transfer;
-import com.portfoliowatch.util.enums.CorporateActionType;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 import java.util.LinkedList;
@@ -13,6 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Data
+@NoArgsConstructor
 public class TransferDto {
 
     private Long id;
