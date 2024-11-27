@@ -15,7 +15,8 @@ public class CorporateActionDto {
     private CorporateActionType type;
     private String oldSymbol;
     private String newSymbol;
-    private Double price;
+    private Double originalPrice;
+    private Double spinOffPrice;
     private Double ratioAntecedent;
     private Double ratioConsequent;
     private Date dateOfEvent;
@@ -25,7 +26,8 @@ public class CorporateActionDto {
         this.type = corporateAction.getType();
         this.oldSymbol = corporateAction.getOldSymbol();
         this.newSymbol = corporateAction.getNewSymbol();
-        this.price = corporateAction.getPrice();
+        this.originalPrice = corporateAction.getOriginalPrice();
+        this.spinOffPrice = corporateAction.getSpinOffPrice();
         this.ratioAntecedent = corporateAction.getRatioAntecedent();
         this.ratioConsequent = corporateAction.getRatioConsequent();
         this.dateOfEvent = corporateAction.getDateOfEvent();
@@ -36,7 +38,7 @@ public class CorporateActionDto {
         corporateAction.setType(this.getType());
         corporateAction.setOldSymbol(this.getOldSymbol());
         corporateAction.setNewSymbol(this.getNewSymbol());
-        corporateAction.setPrice(this.getPrice());
+        corporateAction.setOriginalPrice(this.getOriginalPrice());
         corporateAction.setRatioAntecedent(this.getRatioAntecedent());
         corporateAction.setRatioConsequent(this.getRatioAntecedent());
         corporateAction.setDateOfEvent(this.getDateOfEvent());

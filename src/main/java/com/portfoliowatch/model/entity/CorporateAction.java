@@ -36,8 +36,8 @@ public class CorporateAction implements Base {
     @Column(name = "new_symbol")
     private String newSymbol;
 
-    @Column(name = "price")
-    private Double price;
+    @Column(name = "original_price")
+    private Double originalPrice;
 
     @Column(name = "spin_off_price")
     private Double spinOffPrice;

@@ -17,7 +17,7 @@ public final class ErrorHandler {
     }
 
     public static void validateTrue(Boolean condition, String message) throws IllegalArgumentException {
-        if (condition) {
+        if (!condition) {
             throw new IllegalArgumentException(message);
         }
     }

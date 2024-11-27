@@ -22,6 +22,7 @@ import org.apache.commons.math3.util.Precision;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -117,7 +118,7 @@ public class LotService {
         if (lot != null) {
             lot.setDatetimeUpdated(transaction.getDatetimeUpdated());
             log.info("Lot was updated for: " + transaction);
-            lotRepository.saveAndFlush(lot);
+            lotRepository.save(lot);
         }
     }
 
@@ -142,7 +143,7 @@ public class LotService {
         lot.setDatetimeUpdated(new Date());
         lot.setDatetimeCreated(new Date());
         log.info("Lot was created for: " + transaction);
-        lotRepository.saveAndFlush(lot);
+        lotRepository.save(lot);
     }
 
     /**
@@ -156,12 +157,42 @@ public class LotService {
      *                 the list of lots to be transferred.
      */
     public void transferLotsWith(Transfer transfer) {
-        List<Lot> lotsToTransfer = transfer.getLots();
-        lotsToTransfer.forEach(lot -> {
-            lot.setAccount(transfer.getNewAccount());
-            lot.setDatetimeUpdated(new Date());
-        });
-        lotRepository.saveAllAndFlush(lotsToTransfer);
+        List<Lot> oldAccountLots = lotRepository.findAllByAccount(transfer.getFromAccount());
+        oldAccountLots.sort(Comparator.comparing(Lot::getDateTransacted));
+        Queue<Lot> lotQueue = new LinkedList<>(oldAccountLots);
+
+        Double sharesToTransfer = transfer.getShares();
+        Lot lot;
+        while (sharesToTransfer > 0 && !lotQueue.isEmpty()) {
+            lot = lotQueue.poll();
+            if (sharesToTransfer >= lot.getShares()) {
+                // Remove lot and reduce shares
+                lot.setAccount(transfer.getToAccount());
+                lot.setDatetimeUpdated(new Date());
+                log.info(String.format("Lot id [%s] was transferred to account [%s (%s)]", lot.getId(), transfer.getToAccount().getAccountName(), transfer.getToAccount().getId()));
+                sharesToTransfer -= lot.getShares();
+            } else {
+                // Update lot with reduced shares.
+                Double sharesToStay = lot.getShares() - sharesToTransfer;
+                lot.setShares(sharesToStay);
+                lot.setDatetimeUpdated(new Date());
+                lotRepository.save(lot);
+
+                // Move the rest to new Lot.
+                Lot newLot = new Lot();
+                newLot.setShares(sharesToTransfer);
+                newLot.setSymbol(lot.getSymbol());
+                newLot.setAccount(transfer.getToAccount());
+                newLot.setDatetimeCreated(new Date());
+                newLot.setDatetimeUpdated(newLot.getDatetimeCreated());
+                newLot.setDateTransacted(lot.getDateTransacted());
+                newLot.setPrice(lot.getPrice());
+                lotRepository.save(newLot);
+
+                // Set shares pending to 0.
+                sharesToTransfer = 0.0;
+            }
+        }
     }
 
     /**
@@ -206,7 +237,7 @@ public class LotService {
                 Transaction sellPartialTransaction = new Transaction();
                 sellPartialTransaction.setSymbol(action.getNewSymbol());
                 sellPartialTransaction.setShares(partials);
-                sellPartialTransaction.setPrice(action.getPrice());
+                sellPartialTransaction.setPrice(action.getOriginalPrice());
                 sellPartialTransaction.setAccount(account);
                 this.reduceLotsWith(sellPartialTransaction);
             }
@@ -289,7 +320,7 @@ public class LotService {
         for (Account account: accounts) {
             Date now = new Date();
             double multiplier = action.getRatioConsequent() / action.getRatioAntecedent();
-            double parentFairValue = action.getPrice(); //19.26;
+            double parentFairValue = action.getOriginalPrice(); //19.26;
             double childFairValue = action.getSpinOffPrice(); //24.43;
             double totalFairValue = parentFairValue + (childFairValue * multiplier);
             double proportionateSpinOffVal = childFairValue * multiplier;
@@ -363,8 +394,7 @@ public class LotService {
         queue.addAll(allCorporateActions);
         while (!queue.isEmpty()) {
             Base entity = queue.poll();
-            if (entity instanceof Transaction) {
-                Transaction transaction = (Transaction) entity;
+            if (entity instanceof Transaction transaction) {
                 if (transaction.getType() == TransactionType.SELL) {
                     reduceLotsWith(transaction);
                 } else if (transaction.getType() == TransactionType.BUY || transaction.getType() == TransactionType.GIFT){
@@ -372,8 +402,7 @@ public class LotService {
                 }
             } else if (entity instanceof Transfer) {
                 transferLotsWith((Transfer) entity);
-            } else if (entity instanceof CorporateAction) {
-                CorporateAction corporateAction = (CorporateAction) entity;
+            } else if (entity instanceof CorporateAction corporateAction) {
                 CorporateActionType type = corporateAction.getType();
                 if (type == CorporateActionType.MERGE) {
                     mergeLotsWith(corporateAction);
@@ -384,5 +413,18 @@ public class LotService {
                 }
             }
         }
+    }
+
+    /**
+     * Gets total amount of shares from given account and symbol.
+     * @param account The account to pull lots from.
+     * @param symbol The symbol to filter the selection.
+     * @return The total number of shares combined.
+     */
+    public double getTotalShares(Account account, String symbol) {
+        List<Lot> lots = lotRepository.findAllBySymbolAndAccount(sortByTransactionDate, symbol, account);
+        return lots.stream()
+                .mapToDouble(Lot::getShares)
+                .sum();
     }
 }

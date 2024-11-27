@@ -21,7 +21,7 @@ public class Company {
     private String name;
 
     @Lob
-    @Column
+    @Column(columnDefinition = "LONGTEXT")
     private String description;
 
     @Column(length = 100)

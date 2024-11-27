@@ -41,6 +41,8 @@ public class CompanyService {
             try {
                 CompanyProfile companyProfile = NasdaqAPI.getCompanyProfile(symbol);
                 if (companyProfile != null) {
+                    log.info("Adding new profile: {}", companyProfile);
+                    log.info(companyProfile.getCompanyDescription().getValue());
                     Company company = new Company();
                     company.setSymbol(companyProfile.getSymbol().getValue());
                     company.setName(companyProfile.getCompanyName().getValue());

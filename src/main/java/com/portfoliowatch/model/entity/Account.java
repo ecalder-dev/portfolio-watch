@@ -1,6 +1,8 @@
 package com.portfoliowatch.model.entity;
 
 import com.portfoliowatch.model.entity.base.Base;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import lombok.Data;
 
 import jakarta.persistence.Column;
@@ -12,6 +14,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Entity
@@ -46,5 +49,9 @@ public class Account implements Base {
     @Column(name = "datetime_updated")
     @Temporal(TemporalType.TIMESTAMP)
     private Date datetimeUpdated;
+
+    @OneToMany
+    @JoinColumn(name = "fk_account_lot")
+    private List<Lot> lots;
 
 }

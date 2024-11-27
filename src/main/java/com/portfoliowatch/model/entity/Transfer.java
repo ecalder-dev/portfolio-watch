@@ -9,13 +9,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import java.util.Date;
-import java.util.List;
 
 @Data
 @Entity
@@ -36,17 +34,13 @@ public class Transfer implements AssetAction {
     @Temporal(TemporalType.DATE)
     private Date dateTransacted;
 
-    @OneToMany
-    @JoinColumn(name = "fk_transfer_lot")
-    private List<Lot> lots;
-
     @OneToOne
     @JoinColumn(name = "fk_transfer_old_account")
-    private Account oldAccount;
+    private Account fromAccount;
 
     @OneToOne
     @JoinColumn(name = "fk_transfer_new_account")
-    private Account newAccount;
+    private Account toAccount;
 
     @Column(name = "datetime_created")
     @Temporal(TemporalType.TIMESTAMP)
