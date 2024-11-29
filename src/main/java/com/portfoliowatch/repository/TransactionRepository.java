@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -14,5 +15,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             "ORDER by t.dateTransacted ASC, " +
             "t.datetimeCreated ASC")
     List<Transaction> findAllOrdered();
+
+    @Query("SELECT MAX(t.dateTransacted) FROM Transaction t")
+    Date findLatestDateTransacted();
 
 }

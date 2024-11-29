@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -27,8 +28,13 @@ public class AccountController {
     private final AccountService accountService;
 
     @GetMapping("/accounts")
-    public ResponseEntity<List<AccountDto>> getAllAccounts() {
-        return ResponseEntity.ok(accountService.getAllAccounts());
+    public ResponseEntity<List<AccountDto>> getAllAccounts(@RequestParam(name = "showHidden", required = false, defaultValue = "true") boolean showHidden) {
+        if (showHidden) {
+            return ResponseEntity.ok(accountService.getAllAccounts());
+        } else {
+            return ResponseEntity.ok(accountService.getAllAccountsVisibleOnly());
+        }
+
     }
 
     @GetMapping("/accounts/{id}")

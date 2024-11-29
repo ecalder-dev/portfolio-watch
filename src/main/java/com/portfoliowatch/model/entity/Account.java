@@ -1,6 +1,6 @@
 package com.portfoliowatch.model.entity;
 
-import com.portfoliowatch.model.entity.base.Base;
+import com.portfoliowatch.model.entity.base.BaseEvent;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import lombok.Data;
@@ -19,7 +19,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "accounts")
-public class Account implements Base {
+public class Account implements BaseEvent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

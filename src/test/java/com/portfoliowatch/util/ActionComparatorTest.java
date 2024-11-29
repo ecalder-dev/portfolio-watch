@@ -3,7 +3,7 @@ package com.portfoliowatch.util;
 import com.portfoliowatch.model.entity.CorporateAction;
 import com.portfoliowatch.model.entity.Transaction;
 import com.portfoliowatch.model.entity.Transfer;
-import com.portfoliowatch.model.entity.base.Base;
+import com.portfoliowatch.model.entity.base.BaseEvent;
 import com.portfoliowatch.util.enums.CorporateActionType;
 import com.portfoliowatch.util.enums.TransactionType;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,7 +52,7 @@ class ActionComparatorTest {
         corporateAction.setDateOfEvent(date(7,1,2023));
         corporateAction.setId(8L);
 
-        PriorityQueue<Base> testQueue = new PriorityQueue<>(comparator);
+        PriorityQueue<BaseEvent> testQueue = new PriorityQueue<>(comparator);
         testQueue.add(buyTransaction1);
         testQueue.add(sellTransaction);
         testQueue.add(transfer);
@@ -61,16 +61,16 @@ class ActionComparatorTest {
         testQueue.add(buyTransaction);
 
         /*while (!testQueue.isEmpty()) {
-            Base entityA = testQueue.poll();
+            BaseEvent entityA = testQueue.poll();
             System.out.println(entityA.toString());
         }*/
 
-        Base entityA = testQueue.poll();
-        Base entityB = testQueue.poll();
-        Base entityC = testQueue.poll();
-        Base entityD = testQueue.poll();
-        Base entityE = testQueue.poll();
-        Base entityF = testQueue.poll();
+        BaseEvent entityA = testQueue.poll();
+        BaseEvent entityB = testQueue.poll();
+        BaseEvent entityC = testQueue.poll();
+        BaseEvent entityD = testQueue.poll();
+        BaseEvent entityE = testQueue.poll();
+        BaseEvent entityF = testQueue.poll();
 
         assertNotNull(entityA);
         assertEquals(entityA.getId(), 3L);

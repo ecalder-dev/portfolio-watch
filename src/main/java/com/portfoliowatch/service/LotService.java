@@ -7,7 +7,7 @@ import com.portfoliowatch.model.entity.CorporateAction;
 import com.portfoliowatch.model.entity.Lot;
 import com.portfoliowatch.model.entity.Transaction;
 import com.portfoliowatch.model.entity.Transfer;
-import com.portfoliowatch.model.entity.base.Base;
+import com.portfoliowatch.model.entity.base.BaseEvent;
 import com.portfoliowatch.repository.AccountRepository;
 import com.portfoliowatch.repository.CorporateActionRepository;
 import com.portfoliowatch.repository.LotRepository;
@@ -22,6 +22,7 @@ import org.apache.commons.math3.util.Precision;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
@@ -41,6 +42,7 @@ public class LotService {
     private final TransferRepository transferRepository;
     private final CorporateActionRepository corporateActionRepository;
     private final AccountRepository accountRepository;
+    private Date mostRecentTransactedDate;
 
     private final Sort sortByTransactionDate = Sort.by(Sort.Direction.DESC, "dateTransacted");
 
@@ -384,16 +386,11 @@ public class LotService {
         log.info("Rebuilding lot table.");
         lotRepository.deleteAll();
         // Get all transactions and actions.
-        List<Transaction> allTransactions = transactionRepository.findAll();
-        List<Transfer> allTransfer = transferRepository.findAll();
-        List<CorporateAction> allCorporateActions = corporateActionRepository.findAll();
 
-        PriorityQueue<Base> queue = new PriorityQueue<>(new ActionComparator());
-        queue.addAll(allTransactions);
-        queue.addAll(allTransfer);
-        queue.addAll(allCorporateActions);
+        PriorityQueue<BaseEvent> queue = getAllBaseEventsAsQueue();
+
         while (!queue.isEmpty()) {
-            Base entity = queue.poll();
+            BaseEvent entity = queue.poll();
             if (entity instanceof Transaction transaction) {
                 if (transaction.getType() == TransactionType.SELL) {
                     reduceLotsWith(transaction);
@@ -426,5 +423,25 @@ public class LotService {
         return lots.stream()
                 .mapToDouble(Lot::getShares)
                 .sum();
+    }
+
+    private Date getMostRecentTransactedDate() {
+         Date latestTransactionDate = transactionRepository.findLatestDateTransacted();
+         Date latestTransferDate = transferRepository.findLatestDateTransacted();
+         Date latestCorporateActionDate = corporateActionRepository.findLatestDateOfEvent();
+         return Collections.max(List.of(latestTransactionDate, latestTransferDate, latestCorporateActionDate));
+    }
+
+    private PriorityQueue<BaseEvent> getAllBaseEventsAsQueue() {
+        List<Transaction> allTransactions = transactionRepository.findAll();
+        List<Transfer> allTransfer = transferRepository.findAll();
+        List<CorporateAction> allCorporateActions = corporateActionRepository.findAll();
+
+        PriorityQueue<BaseEvent> queue = new PriorityQueue<>(new ActionComparator());
+        queue.addAll(allTransactions);
+        queue.addAll(allTransfer);
+        queue.addAll(allCorporateActions);
+
+        return queue;
     }
 }

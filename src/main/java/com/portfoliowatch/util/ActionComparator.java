@@ -3,16 +3,16 @@ package com.portfoliowatch.util;
 import com.portfoliowatch.model.entity.CorporateAction;
 import com.portfoliowatch.model.entity.Transaction;
 import com.portfoliowatch.model.entity.Transfer;
-import com.portfoliowatch.model.entity.base.Base;
+import com.portfoliowatch.model.entity.base.BaseEvent;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.Date;
 
-public class ActionComparator implements Comparator<Base> {
+public class ActionComparator implements Comparator<BaseEvent> {
     @Override
-    public int compare(Base entity1, Base entity2) {
+    public int compare(BaseEvent entity1, BaseEvent entity2) {
         LocalDate d1 = getDate(entity1);
         LocalDate d2 = getDate(entity2);
         int dateOnlyComparison = compareByDate(d1, d2);
@@ -51,7 +51,7 @@ public class ActionComparator implements Comparator<Base> {
         }
     }
 
-    private int compareActionPriority(Base entity1, Base entity2) {
+    private int compareActionPriority(BaseEvent entity1, BaseEvent entity2) {
         if (entity1 == null && entity2 == null) {
             return 0;
         }
@@ -64,7 +64,7 @@ public class ActionComparator implements Comparator<Base> {
         return Integer.compare(getClassPriority(entity1), getClassPriority(entity2));
     }
 
-    private int getClassPriority(Base entity) {
+    private int getClassPriority(BaseEvent entity) {
         Class<?> clazz = entity.getClass();
         if (clazz == CorporateAction.class) {
             return 1;
@@ -78,7 +78,7 @@ public class ActionComparator implements Comparator<Base> {
     }
 
 
-    private LocalDate getDate(Base entity) {
+    private LocalDate getDate(BaseEvent entity) {
         Date date;
         if (entity instanceof Transaction) {
             Transaction transaction = (Transaction) entity;

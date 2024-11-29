@@ -26,6 +26,10 @@ public class AccountService {
         return accountRepository.findAll().stream().map(AccountDto::new).collect(Collectors.toList());
     }
 
+    public List<AccountDto> getAllAccountsVisibleOnly() {
+        return accountRepository.findByIsHidden(false).stream().map(AccountDto::new).collect(Collectors.toList());
+    }
+
     public AccountDto getAccount(Long id) {
         return accountRepository.findById(id).map(AccountDto::new).orElse(null);
     }

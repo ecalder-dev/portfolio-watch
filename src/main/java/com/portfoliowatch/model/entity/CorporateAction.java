@@ -1,6 +1,6 @@
 package com.portfoliowatch.model.entity;
 
-import com.portfoliowatch.model.entity.base.Base;
+import com.portfoliowatch.model.entity.base.BaseEvent;
 import com.portfoliowatch.util.enums.CorporateActionType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,7 +20,7 @@ import java.util.Date;
 @Data
 @Entity
 @Table(name = "corporate_actions")
-public class CorporateAction implements Base {
+public class CorporateAction implements BaseEvent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
