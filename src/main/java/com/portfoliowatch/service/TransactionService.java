@@ -25,8 +25,6 @@ public class TransactionService {
 
     private final AccountRepository accountRepository;
 
-    private final LotService lotService;
-
     /**
      * Reads a list of transactions.
      * @return List of transactions.
@@ -50,13 +48,7 @@ public class TransactionService {
 
         Transaction transaction = transactionDto.generateTransaction(account);
         Transaction savedTransaction = transactionRepository.save(transaction);
-        if (transaction.getType() == TransactionType.SELL) {
-            lotService.reduceLotsWith(transaction);
-        } else if (transaction.getType() == TransactionType.GIFT || transaction.getType() == TransactionType.BUY) {
-            lotService.createLotWith(transaction);
-        } else {
-            log.error("Transaction type not supported: " + transaction.getType());
-        }
+
         return new TransactionDto(savedTransaction);
     }
 
@@ -81,15 +73,17 @@ public class TransactionService {
         transaction.setDatetimeUpdated(new Date());
         Transaction savedTransaction = transactionRepository.save(transaction);
 
-        lotService.rebuildAllLots();
         return new TransactionDto(savedTransaction);
+    }
+
+    public Date getDateOfLastUpdate() {
+        return transactionRepository.findLatestDatetimeUpdated();
     }
 
     public void deleteTransaction(Long id) throws NoDataException {
         Transaction transaction = transactionRepository.findById(id)
                 .orElseThrow(() -> new NoDataException("Transaction not found with id " + id));
         transactionRepository.delete(transaction);
-        lotService.rebuildAllLots();
     }
 
 }

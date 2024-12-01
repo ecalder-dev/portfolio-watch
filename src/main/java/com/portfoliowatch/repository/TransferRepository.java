@@ -10,7 +10,7 @@ import java.util.Date;
 @Repository
 public interface TransferRepository extends JpaRepository<Transfer, Long> {
 
-    @Query("SELECT MAX(t.dateTransacted) FROM Transaction t")
-    Date findLatestDateTransacted();
+    @Query("SELECT MAX(t.datetimeUpdated) FROM Transfer t")
+    Date findLatestDatetimeUpdated();
 
 }

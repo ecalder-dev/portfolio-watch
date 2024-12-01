@@ -22,7 +22,6 @@ import org.apache.commons.math3.util.Precision;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
@@ -42,7 +41,6 @@ public class LotService {
     private final TransferRepository transferRepository;
     private final CorporateActionRepository corporateActionRepository;
     private final AccountRepository accountRepository;
-    private Date mostRecentTransactedDate;
 
     private final Sort sortByTransactionDate = Sort.by(Sort.Direction.DESC, "dateTransacted");
 
@@ -423,13 +421,6 @@ public class LotService {
         return lots.stream()
                 .mapToDouble(Lot::getShares)
                 .sum();
-    }
-
-    private Date getMostRecentTransactedDate() {
-         Date latestTransactionDate = transactionRepository.findLatestDateTransacted();
-         Date latestTransferDate = transferRepository.findLatestDateTransacted();
-         Date latestCorporateActionDate = corporateActionRepository.findLatestDateOfEvent();
-         return Collections.max(List.of(latestTransactionDate, latestTransferDate, latestCorporateActionDate));
     }
 
     private PriorityQueue<BaseEvent> getAllBaseEventsAsQueue() {

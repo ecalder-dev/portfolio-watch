@@ -50,7 +50,6 @@ public class TransferService {
                 String.format("There are not enough shares to process transfer. Requested shares: %f, Actual shares: %f.", transferDto.getShares(), currentTotalShares));
 
         Transfer savedTransfer = transferRepository.save(transferDto.generateTransfer(oldAccount, newAccount));
-        lotService.transferLotsWith(savedTransfer);
         return new TransferDto(savedTransfer);
     }
 
@@ -79,14 +78,16 @@ public class TransferService {
         transfer.setToAccount(newAccount);
         transfer.setDatetimeUpdated(new Date());
         Transfer savedTransfer = transferRepository.save(transfer);
-        lotService.rebuildAllLots();
         return new TransferDto(savedTransfer);
+    }
+
+    public Date getDateOfLastUpdate() {
+        return transferRepository.findLatestDatetimeUpdated();
     }
 
     public void deleteTransfer(Long id) {
         Transfer transfer = transferRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Transfer not found with id " + id));
         transferRepository.delete(transfer);
-        lotService.rebuildAllLots();
     }
 }

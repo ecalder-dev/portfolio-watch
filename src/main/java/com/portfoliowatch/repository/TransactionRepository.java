@@ -16,7 +16,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             "t.datetimeCreated ASC")
     List<Transaction> findAllOrdered();
 
-    @Query("SELECT MAX(t.dateTransacted) FROM Transaction t")
-    Date findLatestDateTransacted();
+    @Query("SELECT MAX(t.datetimeUpdated) FROM Transaction t")
+    Date findLatestDatetimeUpdated();
 
 }

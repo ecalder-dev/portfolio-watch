@@ -10,7 +10,7 @@ import java.util.Date;
 @Repository
 public interface CorporateActionRepository extends JpaRepository<CorporateAction, Long> {
 
-    @Query("SELECT MAX(t.dateOfEvent) FROM Transaction t")
-    Date findLatestDateOfEvent();
+    @Query("SELECT MAX(ca.datetimeUpdated) FROM CorporateAction ca")
+    Date findLatestDatetimeUpdated();
 
 }

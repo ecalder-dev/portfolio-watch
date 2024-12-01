@@ -21,8 +21,6 @@ public class CorporateActionService {
 
     private final CorporateActionRepository corporateActionRepository;
 
-    private final LotService lotService;
-
     public List<CorporateActionDto> getAllCorporateActions() {
         return corporateActionRepository.findAll().stream().map(CorporateActionDto::new).collect(Collectors.toList());
     }
@@ -42,14 +40,8 @@ public class CorporateActionService {
         CorporateAction corporateAction = corporateActionDto.generateCorporateAction();
         corporateAction.setDatetimeCreated(new Date());
         corporateAction.setDatetimeUpdated(new Date());
-        CorporateAction savedCorporateAction = corporateActionRepository.save(corporateAction);
-        switch (savedCorporateAction.getType()) {
-            case SPIN -> lotService.spinOffLotsWith(savedCorporateAction);
-            case MERGE -> lotService.mergeLotsWith(savedCorporateAction);
-            case SPLIT -> lotService.splitLotsWith(savedCorporateAction);
-            default -> log.error("Unsupported type: " + savedCorporateAction.getType());
-        }
-        return corporateActionDto;
+
+        return new CorporateActionDto(corporateActionRepository.save(corporateAction));
     }
 
     public CorporateActionDto updateCorporateAction(CorporateActionDto corporateActionDto) throws NoDataException {
@@ -72,7 +64,6 @@ public class CorporateActionService {
         corporateAction.setRatioConsequent(corporateActionDto.getRatioConsequent());
         corporateAction.setDatetimeUpdated(new Date());
         corporateAction.setDateOfEvent(corporateActionDto.getDateOfEvent());
-        lotService.rebuildAllLots();
 
         return new CorporateActionDto(corporateActionRepository.save(corporateAction));
     }
@@ -81,6 +72,9 @@ public class CorporateActionService {
         CorporateAction corporateAction = corporateActionRepository.findById(id)
                 .orElseThrow(() -> new NoDataException("Corporate Action not found with id " + id));
         corporateActionRepository.delete(corporateAction);
-        lotService.rebuildAllLots();
+    }
+
+    public Date getDateOfLastUpdate() {
+        return corporateActionRepository.findLatestDatetimeUpdated();
     }
 }
