@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,8 +46,8 @@ public class TransferService {
                 .orElseThrow(() -> new NoDataException("Account not found with id " + transferDto.getFromAccount().getId()));
         Account newAccount = accountRepository.findById(transferDto.getToAccount().getId())
                 .orElseThrow(() -> new NoDataException("Account not found with id " + transferDto.getToAccount().getId()));
-        Double currentTotalShares = lotService.getTotalShares(oldAccount, transferDto.getSymbol());
-        ErrorHandler.validateTrue(currentTotalShares >= transferDto.getShares(),
+        BigDecimal currentTotalShares = lotService.getTotalShares(oldAccount, transferDto.getSymbol());
+        ErrorHandler.validateTrue(currentTotalShares.compareTo(transferDto.getShares()) >= 0,
                 String.format("There are not enough shares to process transfer. Requested shares: %f, Actual shares: %f.", transferDto.getShares(), currentTotalShares));
 
         Transfer savedTransfer = transferRepository.save(transferDto.generateTransfer(oldAccount, newAccount));
@@ -67,8 +68,8 @@ public class TransferService {
                 .orElseThrow(() -> new NoDataException("Account not found with id " + transferDto.getFromAccount().getId()));
         Account newAccount = accountRepository.findById(transferDto.getToAccount().getId())
                 .orElseThrow(() -> new NoDataException("Account not found with id " + transferDto.getToAccount().getId()));
-        Double currentTotalShares = lotService.getTotalShares(oldAccount, transferDto.getSymbol());
-        ErrorHandler.validateTrue(currentTotalShares >= transferDto.getShares(),
+        BigDecimal currentTotalShares = lotService.getTotalShares(oldAccount, transferDto.getSymbol());
+        ErrorHandler.validateTrue(currentTotalShares.compareTo(transferDto.getShares()) >= 0,
                 String.format("There are not enough shares to process transfer. Requested shares: %f, Actual shares: %f.", transferDto.getShares(), currentTotalShares));
 
         transfer.setDateTransacted(transferDto.getDateTransacted());

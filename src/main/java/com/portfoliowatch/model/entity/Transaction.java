@@ -16,6 +16,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
@@ -27,14 +29,14 @@ public class Transaction implements AssetAction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
-    private Double price;
+    @Column(nullable = false, precision = 20, scale = 5)
+    private BigDecimal price;
 
     @Column(nullable = false, length = 5)
     private String symbol;
 
-    @Column
-    private Double shares;
+    @Column(nullable = false, precision = 20, scale = 5)
+    private BigDecimal shares;
 
     @Column(name = "date_transacted")
     @Temporal(TemporalType.DATE)

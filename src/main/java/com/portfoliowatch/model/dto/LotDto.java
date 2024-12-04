@@ -1,19 +1,24 @@
 package com.portfoliowatch.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.portfoliowatch.model.entity.Account;
 import com.portfoliowatch.model.entity.Lot;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.Date;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 public class LotDto {
 
-    private Long id;
+    private UUID id;
     private String symbol;
-    private Double shares;
+    private BigDecimal shares;
+    private BigDecimal price;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date dateTransacted;
     private AccountDto account;
 
@@ -22,6 +27,7 @@ public class LotDto {
             return;
         }
         this.id = lot.getId();
+        this.price = lot.getPrice();
         this.symbol = lot.getSymbol();
         this.shares = lot.getShares();
         this.dateTransacted = lot.getDateTransacted();

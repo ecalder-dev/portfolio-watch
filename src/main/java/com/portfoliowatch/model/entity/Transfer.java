@@ -9,15 +9,17 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
 @Entity
-@Table(name = "transfer")
+@Table(name = "transfers")
 public class Transfer implements AssetAction {
 
     @Id
@@ -27,18 +29,18 @@ public class Transfer implements AssetAction {
     @Column(nullable = false, length = 5)
     private String symbol;
 
-    @Column
-    private Double shares;
+    @Column(nullable = false, precision = 20, scale = 5)
+    private BigDecimal shares;
 
     @Column(name = "date_transacted")
     @Temporal(TemporalType.DATE)
     private Date dateTransacted;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "fk_transfer_old_account")
     private Account fromAccount;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "fk_transfer_new_account")
     private Account toAccount;
 

@@ -22,6 +22,8 @@ import org.apache.commons.math3.util.Precision;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
@@ -42,6 +44,9 @@ public class LotService {
     private final CorporateActionRepository corporateActionRepository;
     private final AccountRepository accountRepository;
 
+    private final int SCALE = 5;
+    private final RoundingMode ROUNDING = RoundingMode.HALF_UP;
+
     private final Sort sortByTransactionDate = Sort.by(Sort.Direction.DESC, "dateTransacted");
 
     public List<CostBasisDto> getCostBasis() {
@@ -50,17 +55,17 @@ public class LotService {
         for (String symbol: ownedStocks) {
             List<Lot> ownedLots = lotRepository.findAllBySymbol(sortByTransactionDate, symbol);
             if (!ownedLots.isEmpty()) {
-                Double adjustedPrice = 0.0;
-                Double totalShares = 0.0;
+                BigDecimal adjustedPrice = BigDecimal.ZERO;
+                BigDecimal totalShares = BigDecimal.ZERO;
                 CostBasisDto costBasisDto = new CostBasisDto();
                 costBasisDto.setLatestTransactionDate(ownedLots.get(0).getDateTransacted());
                 costBasisDto.setSymbol(symbol);
                 for (Lot lot: ownedLots) {
-                    adjustedPrice += lot.getPrice();
-                    totalShares += lot.getShares();
+                    adjustedPrice = adjustedPrice.add(lot.getPrice().multiply(lot.getShares()));
+                    totalShares = totalShares.add(lot.getShares());
                 }
-                costBasisDto.setAdjustedPrice(adjustedPrice / totalShares);
-                costBasisDto.setTotalShares(totalShares);
+                costBasisDto.setAdjustedPrice(adjustedPrice.divide(totalShares, SCALE, ROUNDING));
+                costBasisDto.setTotalShares(totalShares.setScale(SCALE, ROUNDING));
                 costBasisDto.setLotList(ownedLots.stream().map(LotDto::new).collect(Collectors.toList()));
                 costBasisDtoList.add(costBasisDto);
             }
@@ -89,36 +94,32 @@ public class LotService {
      */
     public void reduceLotsWith(Transaction transaction) {
         // Make sure to sort by transacted date.
-        Queue<Lot> lotQueue = new LinkedList<>(lotRepository.findAllByAccount(transaction.getAccount()));
+        Queue<Lot> lotQueue = new LinkedList<>(lotRepository.findBySymbolAndAccountOrderByDateTransactedAsc(transaction.getSymbol(), transaction.getAccount()));
         if (lotQueue.isEmpty()) {
             log.error("THERE ARE NO LOTS!");
             return;
         }
-        Double sharesToSell = transaction.getShares();
-        Lot lot = null;
-        while (sharesToSell > 0 && !lotQueue.isEmpty()) {
-            lot = lotQueue.poll();
-            if (sharesToSell >= lot.getShares()) {
-                // Remove lot and reduce shares
+        BigDecimal sharesToSell = transaction.getShares();
+        Lot lot = lotQueue.poll();
+        while (sharesToSell.compareTo(BigDecimal.ZERO) > 0 && lot != null) {
+            if (sharesToSell.compareTo(lot.getShares()) >= 0) {
+                // Reduce shares and remove lot.
+                sharesToSell = sharesToSell.subtract(lot.getShares());
                 lotRepository.delete(lot);
-                log.info("Lot was removed for: " + transaction);
-                sharesToSell -= lot.getShares();
-                lot = null;
+                log.info("Lot [" + lot + "] was removed for [" + transaction + "]");
+                lot = lotQueue.poll();
             } else {
                 // Update lot and set sharesToSell to 0.
-                lot.setShares(lot.getShares() - sharesToSell);
-                sharesToSell = 0.0;
+                lot.setShares(lot.getShares().subtract(sharesToSell).setScale(SCALE, ROUNDING));
+                lot.setDatetimeUpdated(transaction.getDatetimeUpdated());
+                log.info("Lot was updated for: " + transaction);
+                lotRepository.save(lot);
+                sharesToSell = BigDecimal.ZERO;
             }
         }
         //There are shares left to sell but no lots to take from.
-        if (sharesToSell > 0) {
+        if (sharesToSell.compareTo(BigDecimal.ZERO) > 0) {
             log.error("NO LOTS LEFT TO SELL");
-        }
-        //if lot still has shares left, save current state
-        if (lot != null) {
-            lot.setDatetimeUpdated(transaction.getDatetimeUpdated());
-            log.info("Lot was updated for: " + transaction);
-            lotRepository.save(lot);
         }
     }
 
@@ -157,23 +158,24 @@ public class LotService {
      *                 the list of lots to be transferred.
      */
     public void transferLotsWith(Transfer transfer) {
-        List<Lot> oldAccountLots = lotRepository.findAllByAccount(transfer.getFromAccount());
+        List<Lot> oldAccountLots = new LinkedList<>(lotRepository.findBySymbolAndAccountOrderByDateTransactedAsc(transfer.getSymbol(), transfer.getFromAccount()));
         oldAccountLots.sort(Comparator.comparing(Lot::getDateTransacted));
         Queue<Lot> lotQueue = new LinkedList<>(oldAccountLots);
 
-        Double sharesToTransfer = transfer.getShares();
-        Lot lot;
-        while (sharesToTransfer > 0 && !lotQueue.isEmpty()) {
-            lot = lotQueue.poll();
-            if (sharesToTransfer >= lot.getShares()) {
+        BigDecimal sharesToTransfer = transfer.getShares();
+        Lot lot = lotQueue.poll();
+        while (sharesToTransfer.compareTo(BigDecimal.ZERO) > 0 && lot != null) {
+            if (sharesToTransfer.compareTo(lot.getShares()) >= 0) {
                 // Remove lot and reduce shares
                 lot.setAccount(transfer.getToAccount());
                 lot.setDatetimeUpdated(new Date());
+                sharesToTransfer = sharesToTransfer.subtract(lot.getShares());
                 log.info(String.format("Lot id [%s] was transferred to account [%s (%s)]", lot.getId(), transfer.getToAccount().getAccountName(), transfer.getToAccount().getId()));
-                sharesToTransfer -= lot.getShares();
+                lotRepository.save(lot);
+                lot = lotQueue.poll();
             } else {
                 // Update lot with reduced shares.
-                Double sharesToStay = lot.getShares() - sharesToTransfer;
+                BigDecimal sharesToStay = lot.getShares().subtract(sharesToTransfer);
                 lot.setShares(sharesToStay);
                 lot.setDatetimeUpdated(new Date());
                 lotRepository.save(lot);
@@ -190,7 +192,7 @@ public class LotService {
                 lotRepository.save(newLot);
 
                 // Set shares pending to 0.
-                sharesToTransfer = 0.0;
+                sharesToTransfer = BigDecimal.ZERO;
             }
         }
     }
@@ -220,20 +222,22 @@ public class LotService {
     public void mergeLotsWith(CorporateAction action) {
         List<Account> accounts = accountRepository.findAll();
         for (Account account: accounts) {
-            List<Lot> affectedLots = lotRepository.findAllBySymbolAndAccount(sortByTransactionDate, action.getOldSymbol(), account);
-            double multiplier = action.getRatioConsequent() / action.getRatioAntecedent();
-            double partials = 0;
+            List<Lot> affectedLots = lotRepository.findBySymbolAndAccountOrderByDateTransactedAsc(action.getOldSymbol(), account);
+            BigDecimal multiplier = action.getRatioConsequent().divide(action.getRatioAntecedent(), SCALE, ROUNDING);
+            BigDecimal partials = BigDecimal.ZERO;
             for (Lot lot : affectedLots) {
-                double multipliedShare = Precision.round(lot.getShares() * multiplier, 4);
-                double newPrice = Precision.round((lot.getPrice() * lot.getShares()) / multipliedShare, 4);
-                partials += multipliedShare % 1;
-                lot.setShares(multipliedShare - (multipliedShare % 1));
+                BigDecimal totalLotPrice = lot.getShares().multiply(lot.getPrice());
+                BigDecimal multipliedShare = lot.getShares().multiply(multiplier);
+                BigDecimal newPrice = totalLotPrice.divide(multipliedShare, SCALE, ROUNDING);
+                BigDecimal lotPartials = multipliedShare.remainder(BigDecimal.ONE);
+                partials = partials.add(lotPartials);
+                lot.setShares(multipliedShare.setScale(0, RoundingMode.FLOOR)); //Get whole number.
                 lot.setPrice(newPrice);
                 lot.setDatetimeUpdated(new Date());
                 lot.setSymbol(action.getNewSymbol());
             }
             lotRepository.saveAllAndFlush(affectedLots);
-            if (partials > 0) {
+            if (partials.compareTo(BigDecimal.ZERO) > 0) {
                 Transaction sellPartialTransaction = new Transaction();
                 sellPartialTransaction.setSymbol(action.getNewSymbol());
                 sellPartialTransaction.setShares(partials);
@@ -269,21 +273,21 @@ public class LotService {
     public void splitLotsWith(CorporateAction action) {
         List<Account> accounts = accountRepository.findAll();
         for (Account account: accounts) {
-            List<Lot> affectedLots = lotRepository.findAllBySymbolAndAccount(sortByTransactionDate, action.getOldSymbol(), account);
-            double multiplier = action.getRatioConsequent() / action.getRatioAntecedent();
-            double beforeTotal = 0;
-            double afterTotal = 0;
+            List<Lot> affectedLots = lotRepository.findBySymbolAndAccountOrderByDateTransactedAsc(action.getOldSymbol(), account);
+            BigDecimal multiplier = action.getRatioConsequent().divide(action.getRatioAntecedent(), SCALE, ROUNDING);
+            BigDecimal beforeTotal = BigDecimal.ZERO;
+            BigDecimal afterTotal = BigDecimal.ZERO;
             for (Lot lot : affectedLots) {
-                afterTotal += lot.getShares();
-                double newShares = Precision.round(lot.getShares() * multiplier, 4);
-                double newPrice = Precision.round(lot.getPrice() / multiplier, 4);
-                beforeTotal += newShares;
+                afterTotal = afterTotal.add(lot.getShares()).setScale(SCALE, ROUNDING);
+                BigDecimal newShares = lot.getShares().multiply(multiplier).setScale(SCALE, ROUNDING);
+                BigDecimal newPrice = lot.getPrice().divide(multiplier, SCALE, ROUNDING);
+                beforeTotal = beforeTotal.add(newShares);
                 lot.setShares(newShares);
                 lot.setPrice(newPrice);
             }
-            lotRepository.saveAllAndFlush(affectedLots);
-            double difference = Math.abs(beforeTotal - afterTotal);
-            if (difference % 1 > 0) {
+            lotRepository.saveAll(affectedLots);
+            BigDecimal difference = beforeTotal.subtract(afterTotal);
+            if (difference.remainder(BigDecimal.ONE).compareTo(BigDecimal.ZERO) > 0) {
                 log.info(String.format("A difference of %f was cashed out.", difference));
             }
         }
@@ -319,34 +323,34 @@ public class LotService {
         List<Account> accounts = accountRepository.findAll();
         for (Account account: accounts) {
             Date now = new Date();
-            double multiplier = action.getRatioConsequent() / action.getRatioAntecedent();
-            double parentFairValue = action.getOriginalPrice(); //19.26;
-            double childFairValue = action.getSpinOffPrice(); //24.43;
-            double totalFairValue = parentFairValue + (childFairValue * multiplier);
-            double proportionateSpinOffVal = childFairValue * multiplier;
-            double adjVal = parentFairValue + proportionateSpinOffVal;
-            double spinOffPercent = proportionateSpinOffVal / adjVal;
-            List<Lot> affectedLots = lotRepository.findAllBySymbolAndAccount(sortByTransactionDate, action.getOldSymbol(), account);
-            double totalSpinOffPrice = 0.0;
-            double totalLot = 0.0;
+            BigDecimal multiplier = action.getRatioConsequent().divide(action.getRatioAntecedent(), SCALE, ROUNDING);
+            BigDecimal parentFairValue = action.getOriginalPrice();
+            BigDecimal childFairValue = action.getSpinOffPrice();
+            BigDecimal proportionateSpinOffVal = childFairValue.multiply(multiplier);
+            BigDecimal totalFairValue = parentFairValue.add(proportionateSpinOffVal);
+            BigDecimal adjVal = parentFairValue.add(proportionateSpinOffVal);
+            BigDecimal spinOffPercent = proportionateSpinOffVal.divide(adjVal, SCALE, ROUNDING);
+            List<Lot> affectedLots = lotRepository.findBySymbolAndAccountOrderByDateTransactedAsc(action.getOldSymbol(), account);
+            BigDecimal totalSpinOffPrice = BigDecimal.ZERO;
+            BigDecimal totalLot = BigDecimal.ZERO;
             for (Lot lot : affectedLots) {
-                double currentPrice = lot.getPrice() * lot.getShares();
-                totalLot += lot.getShares();
-                totalSpinOffPrice += currentPrice * spinOffPercent;
-                lot.setPrice(lot.getPrice() * (parentFairValue / totalFairValue));
+                BigDecimal currentPrice = lot.getPrice().multiply(lot.getShares());
+                totalLot = totalLot.add(lot.getShares());
+                totalSpinOffPrice = totalSpinOffPrice.add(currentPrice.multiply(spinOffPercent));
+                BigDecimal parentToTotal = parentFairValue.divide(totalFairValue, SCALE, ROUNDING);
+                lot.setPrice(lot.getPrice().multiply(parentToTotal).setScale(SCALE, ROUNDING));
                 lot.setDatetimeUpdated(now);
             }
             lotRepository.saveAllAndFlush(affectedLots);
-            double spinOffCount = totalLot * multiplier;
-            double spinOffFraction = spinOffCount % 1;
-            double spinOffWhole = spinOffCount - spinOffFraction;
+            BigDecimal spinOffCount = totalLot.multiply(multiplier);
+            BigDecimal spinOffWhole = spinOffCount.setScale(0, RoundingMode.FLOOR);
 
             // Create spin off if there are any whole shares to spin off.
-            if (spinOffWhole > 0)  {
+            if (spinOffWhole.compareTo(BigDecimal.ZERO) > 0)  {
                 Lot lot = new Lot();
                 lot.setSymbol(action.getNewSymbol());
                 lot.setShares(spinOffWhole);
-                lot.setPrice(totalSpinOffPrice/ spinOffCount);
+                lot.setPrice(totalSpinOffPrice.divide(spinOffCount,SCALE, ROUNDING));
                 lot.setAccount(account);
                 lot.setDatetimeUpdated(now);
                 lot.setDatetimeCreated(now);
@@ -416,11 +420,11 @@ public class LotService {
      * @param symbol The symbol to filter the selection.
      * @return The total number of shares combined.
      */
-    public double getTotalShares(Account account, String symbol) {
-        List<Lot> lots = lotRepository.findAllBySymbolAndAccount(sortByTransactionDate, symbol, account);
+    public BigDecimal getTotalShares(Account account, String symbol) {
+        List<Lot> lots = lotRepository.findBySymbolAndAccountOrderByDateTransactedAsc(symbol, account);
         return lots.stream()
-                .mapToDouble(Lot::getShares)
-                .sum();
+                .map(Lot::getShares) // Assuming getShares returns BigDecimal now
+                .reduce(BigDecimal.ZERO, BigDecimal::add).setScale(SCALE, ROUNDING); // Sum all the BigDecimal values
     }
 
     private PriorityQueue<BaseEvent> getAllBaseEventsAsQueue() {

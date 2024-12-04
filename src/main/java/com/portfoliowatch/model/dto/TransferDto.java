@@ -1,10 +1,12 @@
 package com.portfoliowatch.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.portfoliowatch.model.entity.Account;
 import com.portfoliowatch.model.entity.Transfer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
@@ -13,7 +15,8 @@ public class TransferDto {
 
     private Long id;
     private String symbol;
-    private Double shares;
+    private BigDecimal shares;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date dateTransacted;
     private AccountDto fromAccount;
     private AccountDto toAccount;

@@ -15,6 +15,7 @@ import jakarta.persistence.TemporalType;
 import lombok.Data;
 
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
@@ -36,17 +37,17 @@ public class CorporateAction implements BaseEvent {
     @Column(name = "new_symbol")
     private String newSymbol;
 
-    @Column(name = "original_price")
-    private Double originalPrice;
+    @Column(name = "original_price", precision = 20, scale = 5)
+    private BigDecimal originalPrice;
 
-    @Column(name = "spin_off_price")
-    private Double spinOffPrice;
+    @Column(name = "spin_off_price", precision = 20, scale = 5)
+    private BigDecimal spinOffPrice;
 
-    @Column(name = "ratio_antecedent")
-    private Double ratioAntecedent;
+    @Column(nullable = false, name = "ratio_antecedent", precision = 20, scale = 7)
+    private BigDecimal ratioAntecedent;
 
-    @Column(name = "ratio_consequent")
-    private Double ratioConsequent;
+    @Column(nullable = false, name = "ratio_consequent", precision = 20, scale = 7)
+    private BigDecimal ratioConsequent;
 
     @Column(name = "date_of_event")
     @Temporal(TemporalType.DATE)

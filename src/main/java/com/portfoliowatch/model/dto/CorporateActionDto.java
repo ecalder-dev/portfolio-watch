@@ -1,10 +1,12 @@
 package com.portfoliowatch.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.portfoliowatch.model.entity.CorporateAction;
 import com.portfoliowatch.util.enums.CorporateActionType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
@@ -15,10 +17,11 @@ public class CorporateActionDto {
     private CorporateActionType type;
     private String oldSymbol;
     private String newSymbol;
-    private Double originalPrice;
-    private Double spinOffPrice;
-    private Double ratioAntecedent;
-    private Double ratioConsequent;
+    private BigDecimal originalPrice;
+    private BigDecimal spinOffPrice;
+    private BigDecimal ratioAntecedent;
+    private BigDecimal ratioConsequent;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date dateOfEvent;
 
     public CorporateActionDto(CorporateAction corporateAction) {
@@ -39,8 +42,9 @@ public class CorporateActionDto {
         corporateAction.setOldSymbol(this.getOldSymbol());
         corporateAction.setNewSymbol(this.getNewSymbol());
         corporateAction.setOriginalPrice(this.getOriginalPrice());
+        corporateAction.setSpinOffPrice(this.getSpinOffPrice());
         corporateAction.setRatioAntecedent(this.getRatioAntecedent());
-        corporateAction.setRatioConsequent(this.getRatioAntecedent());
+        corporateAction.setRatioConsequent(this.getRatioConsequent());
         corporateAction.setDateOfEvent(this.getDateOfEvent());
         corporateAction.setDatetimeCreated(new Date());
         corporateAction.setDatetimeUpdated(corporateAction.getDatetimeCreated());

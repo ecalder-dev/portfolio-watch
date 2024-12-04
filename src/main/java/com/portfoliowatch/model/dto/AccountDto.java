@@ -1,5 +1,6 @@
 package com.portfoliowatch.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.portfoliowatch.model.entity.Account;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,7 +14,9 @@ public class AccountDto {
     private Long id;
     private String accountName;
     private String accountNumber;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date dateOpened;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date dateClosed;
     private Boolean isHidden;
 

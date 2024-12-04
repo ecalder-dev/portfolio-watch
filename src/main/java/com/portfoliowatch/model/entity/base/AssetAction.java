@@ -1,5 +1,6 @@
 package com.portfoliowatch.model.entity.base;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 public interface AssetAction extends BaseEvent {
@@ -8,9 +9,9 @@ public interface AssetAction extends BaseEvent {
 
     void setSymbol(String symbol);
 
-    Double getShares();
+    BigDecimal getShares();
 
-    void setShares(Double shares);
+    void setShares(BigDecimal shares);
 
     Date getDateTransacted();
 

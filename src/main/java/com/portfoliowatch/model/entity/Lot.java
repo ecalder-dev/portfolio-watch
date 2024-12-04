@@ -14,26 +14,29 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+
+import java.math.BigDecimal;
 import java.util.Date;
+import java.util.UUID;
 
 @Data
 @Entity
 @NoArgsConstructor
 @Table(name = "lots")
-public class Lot implements AssetAction {
+public class Lot {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
 
-    @Column
-    private Double price;
+    @Column(nullable = false, precision = 20, scale = 5)
+    private BigDecimal price;
 
     @Column(nullable = false, length = 5)
     private String symbol;
 
-    @Column
-    private Double shares;
+    @Column(nullable = false, precision = 20, scale = 5)
+    private BigDecimal shares;
 
     @Column(name = "date_transacted")
     @Temporal(TemporalType.DATE)
@@ -50,13 +53,5 @@ public class Lot implements AssetAction {
     @Column(name = "datetime_updated")
     @Temporal(TemporalType.TIMESTAMP)
     private Date datetimeUpdated;
-
-    public Lot(Transaction transaction) {
-        this.setSymbol(transaction.getSymbol());
-        this.setPrice(transaction.getPrice());
-        this.setAccount(transaction.getAccount());
-        this.setShares(transaction.getShares());
-        this.setDateTransacted(transaction.getDateTransacted());
-    }
 
 }

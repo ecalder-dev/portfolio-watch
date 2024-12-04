@@ -24,7 +24,7 @@ public class Company {
     @Column(columnDefinition = "LONGTEXT")
     private String description;
 
-    @Column(length = 100)
+    @Column(length = 300)
     private String address;
 
     @Column(length = 100)
