@@ -1,8 +1,6 @@
 package com.portfoliowatch.model.entity;
 
-import com.portfoliowatch.model.entity.base.BaseEvent;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
+import com.portfoliowatch.model.entity.base.AssetAction;
 import lombok.Data;
 
 import jakarta.persistence.Column;
@@ -10,37 +8,41 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+
+import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
 
 @Data
 @Entity
-@Table(name = "accounts")
-public class Account implements BaseEvent {
+@Table(name = "transfers")
+public class Transfer implements AssetAction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "account_name", nullable = false)
-    private String accountName;
+    @Column(nullable = false, length = 5)
+    private String symbol;
 
-    @Column(name = "account_number")
-    private String accountNumber;
+    @Column(nullable = false, precision = 20, scale = 5)
+    private BigDecimal shares;
 
-    @Column(name = "date_opened")
+    @Column(name = "date_transacted")
     @Temporal(TemporalType.DATE)
-    private Date dateOpened;
+    private Date dateTransacted;
 
-    @Column(name = "date_closed")
-    @Temporal(TemporalType.DATE)
-    private Date dateClosed;
+    @ManyToOne
+    @JoinColumn(name = "fk_transfer_old_account")
+    private Account fromAccount;
 
-    @Column(name = "is_hidden")
-    private Boolean isHidden;
+    @ManyToOne
+    @JoinColumn(name = "fk_transfer_new_account")
+    private Account toAccount;
 
     @Column(name = "datetime_created")
     @Temporal(TemporalType.TIMESTAMP)
@@ -49,9 +51,5 @@ public class Account implements BaseEvent {
     @Column(name = "datetime_updated")
     @Temporal(TemporalType.TIMESTAMP)
     private Date datetimeUpdated;
-
-    @OneToMany
-    @JoinColumn(name = "fk_account_lot")
-    private List<Lot> lots;
 
 }
