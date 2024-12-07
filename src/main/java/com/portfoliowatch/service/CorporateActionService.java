@@ -32,9 +32,7 @@ public class CorporateActionService {
 
     public CorporateActionDto createCorporateAction(CorporateActionDto corporateActionDto) throws NoDataException {
         ErrorHandler.validateNonNull(corporateActionDto.getType(), "CorporateActionDto's type should not be null.");
-        ErrorHandler.validateNonNull(corporateActionDto.getOriginalPrice(), "CorporateActionDto's original price should not be null.");
         ErrorHandler.validateNonNull(corporateActionDto.getOldSymbol(), "CorporateActionDto's oldSymbol should not be null.");
-        ErrorHandler.validateNonNull(corporateActionDto.getNewSymbol(), "CorporateActionDto's newSymbol should not be null.");
         ErrorHandler.validateNonNull(corporateActionDto.getDateOfEvent(), "CorporateActionDto's dateOfEvent should not be null.");
 
         CorporateAction corporateAction = corporateActionDto.generateCorporateAction();
@@ -47,9 +45,7 @@ public class CorporateActionService {
     public CorporateActionDto updateCorporateAction(CorporateActionDto corporateActionDto) throws NoDataException {
         ErrorHandler.validateNonNull(corporateActionDto.getId(), "CorporateActionDto's id should not be null.");
         ErrorHandler.validateNonNull(corporateActionDto.getType(), "CorporateActionDto's type should not be null.");
-        ErrorHandler.validateNonNull(corporateActionDto.getOriginalPrice(), "CorporateActionDto's original price should not be null.");
         ErrorHandler.validateNonNull(corporateActionDto.getOldSymbol(), "CorporateActionDto's oldSymbol should not be null.");
-        ErrorHandler.validateNonNull(corporateActionDto.getNewSymbol(), "CorporateActionDto's newSymbol should not be null.");
         ErrorHandler.validateNonNull(corporateActionDto.getDateOfEvent(), "CorporateActionDto's dateOfEvent should not be null.");
 
         Long id = corporateActionDto.getId();

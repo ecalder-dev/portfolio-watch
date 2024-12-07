@@ -2,6 +2,7 @@ package com.portfoliowatch.service;
 
 import com.portfoliowatch.model.dto.CostBasisDto;
 import com.portfoliowatch.model.dto.LotDto;
+import com.portfoliowatch.model.dto.schwab.BrokerageTransaction;
 import com.portfoliowatch.model.entity.Account;
 import com.portfoliowatch.model.entity.CorporateAction;
 import com.portfoliowatch.model.entity.Lot;
@@ -159,6 +160,8 @@ public class LotService {
      */
     public void transferLotsWith(Transfer transfer) {
         List<Lot> oldAccountLots = new LinkedList<>(lotRepository.findBySymbolAndAccountOrderByDateTransactedAsc(transfer.getSymbol(), transfer.getFromAccount()));
+        log.info(String.format("Transferring [%s] from Account[id=%d] to  Account[id=%d]", transfer.getSymbol(), transfer.getFromAccount().getId(), transfer.getToAccount().getId()));
+        log.info(String.format("Attempting to transfer [%s] stocks from a existing [%s]", transfer.getShares(), getTotalShares(transfer.getFromAccount(), transfer.getSymbol())));
         oldAccountLots.sort(Comparator.comparing(Lot::getDateTransacted));
         Queue<Lot> lotQueue = new LinkedList<>(oldAccountLots);
 
@@ -423,7 +426,7 @@ public class LotService {
     public BigDecimal getTotalShares(Account account, String symbol) {
         List<Lot> lots = lotRepository.findBySymbolAndAccountOrderByDateTransactedAsc(symbol, account);
         return lots.stream()
-                .map(Lot::getShares) // Assuming getShares returns BigDecimal now
+                .map(Lot::getShares)
                 .reduce(BigDecimal.ZERO, BigDecimal::add).setScale(SCALE, ROUNDING); // Sum all the BigDecimal values
     }
 
@@ -438,5 +441,83 @@ public class LotService {
         queue.addAll(allCorporateActions);
 
         return queue;
+    }
+
+    public List<BaseEvent> processSchwabTransactions(List<BrokerageTransaction> brokerageTransactionList, Long targetAccountId, Long transferAccountId, boolean isSimulation) {
+        Account targetAccount = accountRepository.findById(targetAccountId).orElse(null);
+        Account accountToTransfer = accountRepository.findById(transferAccountId).orElse(null);
+        List<BaseEvent> events = new LinkedList<>();
+        List<Transaction> transactions = new LinkedList<>();
+        List<Transfer> transfers = new LinkedList<>();
+        List<CorporateAction> corporateActions = new LinkedList<>();
+
+        for (BrokerageTransaction brokerageTransaction: brokerageTransactionList) {
+            if (brokerageTransaction.getAction() == null) {
+                continue;
+            }
+            switch (brokerageTransaction.getAction()) {
+                case BUY -> {
+                    Transaction buyTransaction = new Transaction();
+                    buyTransaction.setType(TransactionType.BUY);
+                    buyTransaction.setAccount(targetAccount);
+                    buyTransaction.setSymbol(brokerageTransaction.getSymbol());
+                    buyTransaction.setPrice(brokerageTransaction.getPrice());
+                    buyTransaction.setShares(brokerageTransaction.getQuantity());
+                    buyTransaction.setDateTransacted(brokerageTransaction.getTransactionDate());
+                    buyTransaction.setDatetimeCreated(new Date());
+                    buyTransaction.setDatetimeUpdated(buyTransaction.getDatetimeCreated());
+                    transactions.add(buyTransaction);
+                }
+                case SELL -> {
+                    Transaction sellTransaction = new Transaction();
+                    sellTransaction.setType(TransactionType.SELL);
+                    sellTransaction.setAccount(targetAccount);
+                    sellTransaction.setSymbol(brokerageTransaction.getSymbol());
+                    sellTransaction.setPrice(brokerageTransaction.getPrice());
+                    sellTransaction.setShares(brokerageTransaction.getQuantity());
+                    sellTransaction.setDateTransacted(brokerageTransaction.getTransactionDate());
+                    sellTransaction.setDatetimeCreated(new Date());
+                    sellTransaction.setDatetimeUpdated(sellTransaction.getDatetimeCreated());
+                    transactions.add(sellTransaction);
+                }
+                case TRANSFER -> {
+                    if (brokerageTransaction.getSymbol() != null && !brokerageTransaction.getSymbol().isEmpty() && brokerageTransaction.getQuantity() != null) {
+                        Transfer transfer = new Transfer();
+                        transfer.setSymbol(brokerageTransaction.getSymbol());
+                        transfer.setShares(brokerageTransaction.getQuantity());
+                        transfer.setFromAccount(targetAccount);
+                        transfer.setToAccount(accountToTransfer);
+                        transfer.setDateTransacted(brokerageTransaction.getTransactionDate());
+                        transfer.setDatetimeCreated(new Date());
+                        transfer.setDatetimeUpdated(transfer.getDatetimeCreated());
+                        transfers.add(transfer);
+                    }
+                }
+                case SPLIT ->  {
+                    CorporateAction corporateAction = new CorporateAction();
+                    corporateAction.setType(CorporateActionType.SPLIT);
+                    corporateAction.setRatioAntecedent(BigDecimal.ZERO);
+                    corporateAction.setRatioConsequent(BigDecimal.ZERO);
+                    corporateAction.setOldSymbol(brokerageTransaction.getSymbol());
+                    corporateAction.setNewSymbol(brokerageTransaction.getSymbol());
+                    corporateAction.setDateOfEvent(brokerageTransaction.getTransactionDate());
+                    corporateAction.setDatetimeCreated(new Date());
+                    corporateAction.setDatetimeUpdated(corporateAction.getDatetimeCreated());
+                    corporateActions.add(corporateAction);
+                }
+                default -> {}
+            }
+        };
+        events.addAll(transactions);
+        events.addAll(transfers);
+        events.addAll(corporateActions);
+
+        if (!isSimulation) {
+            transactionRepository.saveAll(transactions);
+            transferRepository.saveAll(transfers);
+            corporateActionRepository.saveAll(corporateActions);
+            rebuildAllLots();
+        }
+        return events;
     }
 }
