@@ -1,4 +1,4 @@
-package com.portfoliowatch.service.thirdparty;
+package com.portfoliowatch.service.third;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

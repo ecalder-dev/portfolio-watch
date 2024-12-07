@@ -1,6 +1,6 @@
 package com.portfoliowatch.service;
 
-import com.portfoliowatch.service.thirdparty.NasdaqAPI;
+import com.portfoliowatch.service.third.NasdaqAPI;
 import com.portfoliowatch.model.entity.Company;
 import com.portfoliowatch.model.nasdaq.CompanyProfile;
 import com.portfoliowatch.repository.CompanyRepository;
@@ -41,6 +41,8 @@ public class CompanyService {
             try {
                 CompanyProfile companyProfile = NasdaqAPI.getCompanyProfile(symbol);
                 if (companyProfile != null) {
+                    log.info("Adding new profile: {}", companyProfile);
+                    log.info(companyProfile.getCompanyDescription().getValue());
                     Company company = new Company();
                     company.setSymbol(companyProfile.getSymbol().getValue());
                     company.setName(companyProfile.getCompanyName().getValue());

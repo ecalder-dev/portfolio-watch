@@ -1,8 +1,10 @@
 package com.portfoliowatch.controller;
 
-import com.portfoliowatch.model.entity.Transaction;
+import com.portfoliowatch.model.dto.TransactionDto;
 import com.portfoliowatch.service.TransactionService;
+import com.portfoliowatch.util.exception.NoDataException;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,92 +13,63 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@Slf4j
 @AllArgsConstructor
 @RestController
+@RequestMapping("/api")
 public class TransactionController {
 
     private final TransactionService transactionService;
 
-    @PostMapping("/transaction")
-    public ResponseEntity<Transaction> createTransaction(@RequestBody Transaction transaction) {
-        Transaction data;
-        HttpStatus httpStatus;
-        try {
-            data = transactionService.createTransaction(transaction);
-            httpStatus = HttpStatus.OK;
-        } catch (Exception e) {
-            data = null;
-            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-        }
-        return new ResponseEntity<>(data, httpStatus);
-    }
-
     @GetMapping("/transactions")
-    public ResponseEntity<List<Transaction>> readAllTransactions() {
-        List<Transaction> data;
-        HttpStatus httpStatus;
-        try {
-            data = transactionService.getAllTransactions(null);
-            httpStatus = HttpStatus.OK;
-        } catch (Exception e) {
-            data = null;
-            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-        }
-        return new ResponseEntity<>(data, httpStatus);
+    public ResponseEntity<List<TransactionDto>> getAllTransactions() {
+        return ResponseEntity.ok(transactionService.getAllTransactions());
     }
 
-    @GetMapping("/transaction/{id}")
-    public ResponseEntity<Transaction> readAllTransactions(@PathVariable("id") Long id) {
-        Transaction data;
-        HttpStatus httpStatus;
-        try {
-            data = transactionService.getTransactionById(id);
-            httpStatus = data == null ? HttpStatus.NOT_FOUND : HttpStatus.OK;
-        } catch (Exception e) {
-            data = null;
-            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+    @GetMapping("/transactions/{id}")
+    public ResponseEntity<TransactionDto> getTransaction(@PathVariable("id") Long id) {
+        TransactionDto data = transactionService.getTransactionById(id);
+        if (data != null) {
+            return ResponseEntity.ok(data);
+        } else {
+            return ResponseEntity.notFound().build();
         }
-        return new ResponseEntity<>(data, httpStatus);
     }
 
-    @PutMapping("/transaction")
-    public ResponseEntity<Transaction> updateTransaction(@RequestBody Transaction transaction) {
-        Transaction data;
-        HttpStatus httpStatus;
+    @PostMapping("/transactions")
+    public ResponseEntity<TransactionDto> createTransaction(@RequestBody TransactionDto transactionDto) {
         try {
-            data = transactionService.updateTransaction(transaction);
-            if (data != null) {
-                httpStatus = HttpStatus.OK;
-            } else {
-                httpStatus = HttpStatus.NOT_FOUND;
-            }
-        } catch (Exception e) {
-            data = null;
-            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+            return ResponseEntity.status(HttpStatus.CREATED).body(transactionService.createTransaction(transactionDto));
+        } catch (NoDataException e) {
+            log.error(e.getLocalizedMessage());
+            return ResponseEntity.badRequest().build();
         }
-        return new ResponseEntity<>(data, httpStatus);
+
     }
 
-    @DeleteMapping("/transaction")
-    public ResponseEntity<Boolean> deleteTransaction(@RequestBody Transaction transaction) {
-        boolean data;
-        HttpStatus httpStatus;
+    @PutMapping("/transactions")
+    public ResponseEntity<TransactionDto> updateTransaction(@RequestBody TransactionDto transactionDto) {
         try {
-            data = transactionService.deleteTransaction(transaction);
-            httpStatus = HttpStatus.OK;
+            return ResponseEntity.ok(transactionService.updateTransaction(transactionDto));
         } catch (Exception e) {
-            data = false;
-            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+            log.error(e.getLocalizedMessage());
+            return ResponseEntity.badRequest().build();
         }
-        return new ResponseEntity<>(data, httpStatus);
     }
 
-    @GetMapping("/regenerateTransactions")
-    public void generateAccountLotListMap() {
-        transactionService.performAllRecordedTransactions();
+    @DeleteMapping("/transactions/{id}")
+    public ResponseEntity<Void> deleteTransaction(@PathVariable Long id) {
+        try {
+            transactionService.deleteTransaction(id);
+            return ResponseEntity.noContent().build();
+        } catch (NoDataException e) {
+            log.error(e.getLocalizedMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

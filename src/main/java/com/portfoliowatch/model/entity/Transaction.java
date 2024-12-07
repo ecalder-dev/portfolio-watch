@@ -1,67 +1,61 @@
 package com.portfoliowatch.model.entity;
 
+import com.portfoliowatch.model.entity.base.AssetAction;
+import com.portfoliowatch.util.enums.TransactionType;
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
 @Entity
 @Table(name = "transactions")
-public class Transaction {
+public class Transaction implements AssetAction {
 
     @Id
-    @Column(name = "transaction_id")
-    @GeneratedValue(strategy=GenerationType.AUTO)
-    private Long transactionId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Column(name ="type", length = 3)
-    private String type;
+    @Column(nullable = false, precision = 20, scale = 5)
+    private BigDecimal price;
 
     @Column(nullable = false, length = 5)
     private String symbol;
 
-    @Column(name = "shares")
-    private Double shares;
-
-    @Column(name = "price")
-    private Double price;
-
-    @Column(length = 10)
-    private String ratio;
-
-    @Column(name = "new_symbol", length = 5)
-    private String newSymbol;
-
-    @Column(name = "execution_priority")
-    private Integer executionPriority;
-
-    @ManyToOne
-    @JoinColumn(name = "fk_transaction_account")
-    private Account account;
+    @Column(nullable = false, precision = 20, scale = 5)
+    private BigDecimal shares;
 
     @Column(name = "date_transacted")
     @Temporal(TemporalType.DATE)
     private Date dateTransacted;
 
-    @Column(name = "date_settled")
-    @Temporal(TemporalType.DATE)
-    private Date dateSettled;
+    @Enumerated(EnumType.STRING)
+    @Column(name ="type", length = 5)
+    private TransactionType type;
 
-    @Column(name = "date_inserted")
+    @ManyToOne
+    @JoinColumn(name = "fk_transaction_account")
+    private Account account;
+
+    @Column(name = "datetime_created")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date datetimeInserted;
+    private Date datetimeCreated;
 
-    @Column(name = "date_updated")
+    @Column(name = "datetime_updated")
     @Temporal(TemporalType.TIMESTAMP)
     private Date datetimeUpdated;
+
 }
