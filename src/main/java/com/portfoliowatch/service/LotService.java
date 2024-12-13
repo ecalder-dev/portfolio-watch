@@ -103,9 +103,6 @@ public class LotService {
       log.error("THERE ARE NO LOTS!");
       return;
     }
-    if (transaction.getSymbol().equalsIgnoreCase("BEPC")) {
-      log.error("START");
-    }
     BigDecimal sharesToSell = transaction.getShares();
     Lot lot = lotQueue.poll();
     while (sharesToSell.compareTo(BigDecimal.ZERO) > 0 && lot != null) {
