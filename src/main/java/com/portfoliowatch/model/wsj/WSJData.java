@@ -1,11 +1,11 @@
 package com.portfoliowatch.model.wsj;
 
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
-@Setter @Getter
+@Setter
+@Getter
 public class WSJData {
-    private List<WSJInstrument> instruments;
+  private List<WSJInstrument> instruments;
 }

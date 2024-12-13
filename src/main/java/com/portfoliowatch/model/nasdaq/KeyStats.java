@@ -4,10 +4,12 @@ import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter @Setter
+@Getter
+@Setter
 public class KeyStats {
-    @SerializedName("Volume")
-    private LabelValue volume;
-    @SerializedName("ExpenseRatio")
-    private LabelValue expenseRatio;
+  @SerializedName("Volume")
+  private LabelValue volume;
+
+  @SerializedName("ExpenseRatio")
+  private LabelValue expenseRatio;
 }

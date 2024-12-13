@@ -4,16 +4,15 @@ import java.util.Date;
 
 public interface BaseEvent {
 
-    Long getId();
+  Long getId();
 
-    void setId(Long id);
+  void setId(Long id);
 
-    Date getDatetimeCreated();
+  Date getDatetimeCreated();
 
-    void setDatetimeCreated(Date datetimeCreated);
+  void setDatetimeCreated(Date datetimeCreated);
 
-    Date getDatetimeUpdated();
+  Date getDatetimeUpdated();
 
-    void setDatetimeUpdated(Date datetimeUpdated);
-
+  void setDatetimeUpdated(Date datetimeUpdated);
 }

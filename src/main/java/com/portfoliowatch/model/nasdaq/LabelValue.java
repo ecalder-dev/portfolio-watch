@@ -1,9 +1,11 @@
 package com.portfoliowatch.model.nasdaq;
+
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter @Setter
+@Getter
+@Setter
 public class LabelValue {
-    private String label;
-    private String value;
+  private String label;
+  private String value;
 }

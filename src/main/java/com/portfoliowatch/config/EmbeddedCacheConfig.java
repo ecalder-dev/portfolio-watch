@@ -5,6 +5,4 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @EnableCaching
-class EmbeddedCacheConfig {
-
-}
+class EmbeddedCacheConfig {}

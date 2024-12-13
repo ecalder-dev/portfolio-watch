@@ -6,5 +6,5 @@ import lombok.Setter;
 @Setter
 @Getter
 public class WSJResponse {
-    private WSJData data;
+  private WSJData data;
 }

@@ -10,10 +10,15 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableAsync
 @EnableAutoConfiguration
 @SpringBootApplication
-@OpenAPIDefinition(info = @Info(title = "Portfolio Watch API", version = "v2", description = "API for Portfolio Watch"))
+@OpenAPIDefinition(
+    info =
+        @Info(
+            title = "Portfolio Watch API",
+            version = "v2",
+            description = "API for Portfolio Watch"))
 public class Application {
 
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
-    }
+  public static void main(String[] args) {
+    SpringApplication.run(Application.class, args);
+  }
 }

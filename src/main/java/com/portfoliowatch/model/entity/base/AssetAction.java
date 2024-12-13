@@ -5,16 +5,15 @@ import java.util.Date;
 
 public interface AssetAction extends BaseEvent {
 
-    String getSymbol();
+  String getSymbol();
 
-    void setSymbol(String symbol);
+  void setSymbol(String symbol);
 
-    BigDecimal getShares();
+  BigDecimal getShares();
 
-    void setShares(BigDecimal shares);
+  void setShares(BigDecimal shares);
 
-    Date getDateTransacted();
+  Date getDateTransacted();
 
-    void setDateTransacted(Date dateTransacted);
-
+  void setDateTransacted(Date dateTransacted);
 }

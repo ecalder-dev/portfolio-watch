@@ -1,5 +1,8 @@
 package com.portfoliowatch.util.enums;
 
 public enum CorporateActionType {
-    MERGE, SPIN, SPLIT
+  REVERSE_SPLIT,
+  SPIN,
+  SPLIT,
+  MERGE
 }

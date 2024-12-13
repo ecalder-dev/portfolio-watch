@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class ResponseData<T> {
-        private T data;
-        private String message;
+  private T data;
+  private String message;
 }

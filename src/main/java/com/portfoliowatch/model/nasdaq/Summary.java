@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class Summary {
-    String symbol;
-    SummaryData summaryData;
-    String assetClass;
+  String symbol;
+  SummaryData summaryData;
+  String assetClass;
 }
