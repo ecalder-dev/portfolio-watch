@@ -47,7 +47,6 @@ public class LotService {
 
   private final int SCALE = 5;
   private final RoundingMode ROUNDING = RoundingMode.HALF_UP;
-
   private final Sort sortByTransactionDate = Sort.by(Sort.Direction.DESC, "dateTransacted");
 
   public List<CostBasisDto> getCostBasis() {

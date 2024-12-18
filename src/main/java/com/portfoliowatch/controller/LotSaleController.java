@@ -1,7 +1,9 @@
 package com.portfoliowatch.controller;
 
 import com.portfoliowatch.model.dto.AggregatedAnnualSaleDto;
+import com.portfoliowatch.model.dto.LotSaleDto;
 import com.portfoliowatch.service.LotSaleService;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +21,18 @@ public class LotSaleController {
   private final LotSaleService lotSaleService;
 
   @GetMapping("/{year}")
-  public ResponseEntity<AggregatedAnnualSaleDto> getAggregatedLotSalesByYear(
+  public ResponseEntity<List<LotSaleDto>> getAllLotSalesByYear(@PathVariable("year") Integer year) {
+    return ResponseEntity.ok(lotSaleService.getLotSalesByYear(year));
+  }
+
+  @GetMapping("/aggregate/{year}")
+  public ResponseEntity<AggregatedAnnualSaleDto> getAggregatedLotSales(
       @PathVariable("year") Integer year) {
-    return ResponseEntity.ok(lotSaleService.getAggregatedLotSalesByYear(year));
+    return ResponseEntity.ok(lotSaleService.getAggregatedAnnualSaleByYear(year));
+  }
+
+  @GetMapping("/tax-years")
+  public ResponseEntity<List<Integer>> getAllAvailableTaxYears() {
+    return ResponseEntity.ok(lotSaleService.getAllAvailableTaxYears());
   }
 }

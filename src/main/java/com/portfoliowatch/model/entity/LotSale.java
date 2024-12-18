@@ -36,14 +36,18 @@ public class LotSale {
   @Column(name = "type", length = 16)
   private LotSaleType type;
 
+  @Column(nullable = false, name = "acquisition_price", precision = 20, scale = 5)
+  private BigDecimal acquisitionPrice;
+
+  @Column(nullable = false, name = "total_acquisition_price", precision = 20, scale = 5)
+  private BigDecimal totalAcquisitionPrice;
+
+  @Column(name = "date_acquired")
+  @Temporal(TemporalType.DATE)
+  private Date dateAcquired;
+
   @Column(nullable = false, name = "sold_shares", precision = 20, scale = 5)
   private BigDecimal soldShares;
-
-  @Column(nullable = false, name = "purchase_price", precision = 20, scale = 5)
-  private BigDecimal purchasedPrice;
-
-  @Column(nullable = false, name = "total_purchased_price", precision = 20, scale = 5)
-  private BigDecimal totalPurchasedPrice;
 
   @Column(nullable = false, name = "sold_price", precision = 20, scale = 5)
   private BigDecimal soldPrice;
@@ -51,15 +55,15 @@ public class LotSale {
   @Column(nullable = false, name = "total_sold_price", precision = 20, scale = 5)
   private BigDecimal totalSoldPrice;
 
-  @Column(nullable = false, name = "total_price_difference", precision = 20, scale = 5)
-  private BigDecimal totalPriceDifference;
+  @Column(name = "date_sold")
+  @Temporal(TemporalType.DATE)
+  private Date dateSold;
 
   @Column(nullable = false, name = "tax_year")
   private Integer taxYear;
 
-  @Column(name = "date_transacted")
-  @Temporal(TemporalType.DATE)
-  private Date dateTransacted;
+  @Column(nullable = false, name = "total_price_difference", precision = 20, scale = 5)
+  private BigDecimal totalPriceDifference;
 
   @ManyToOne
   @JoinColumn(name = "fk_lot_sale_lot")
