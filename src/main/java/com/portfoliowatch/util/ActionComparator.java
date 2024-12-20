@@ -5,7 +5,6 @@ import com.portfoliowatch.model.entity.Transaction;
 import com.portfoliowatch.model.entity.Transfer;
 import com.portfoliowatch.model.entity.base.BaseEvent;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.Date;
 
@@ -77,7 +76,7 @@ public class ActionComparator implements Comparator<BaseEvent> {
   }
 
   private LocalDate getDate(BaseEvent entity) {
-    Date date;
+    LocalDate date;
     if (entity instanceof Transaction) {
       Transaction transaction = (Transaction) entity;
       date = transaction.getDateTransacted();
@@ -90,15 +89,6 @@ public class ActionComparator implements Comparator<BaseEvent> {
     } else {
       return null;
     }
-    if (date == null) {
-      return null;
-    }
-    if (date instanceof java.sql.Date) {
-      return ((java.sql.Date) date).toLocalDate();
-    } else {
-      return date.toInstant()
-          .atZone(ZoneId.systemDefault()) // Convert Instant to ZonedDateTime
-          .toLocalDate();
-    }
+    return date;
   }
 }

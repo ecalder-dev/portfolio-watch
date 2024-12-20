@@ -5,7 +5,7 @@ import com.portfoliowatch.model.entity.Account;
 import com.portfoliowatch.model.entity.Transaction;
 import com.portfoliowatch.util.enums.TransactionType;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -19,7 +19,7 @@ public class TransactionDto {
   private BigDecimal shares;
 
   @JsonFormat(pattern = "yyyy-MM-dd")
-  private Date dateTransacted;
+  private LocalDate dateTransacted;
 
   private TransactionType type;
   private AccountDto account;

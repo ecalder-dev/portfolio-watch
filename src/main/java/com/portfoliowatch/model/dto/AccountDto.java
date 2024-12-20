@@ -2,6 +2,7 @@ package com.portfoliowatch.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.portfoliowatch.model.entity.Account;
+import java.time.LocalDate;
 import java.util.Date;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,10 +16,10 @@ public class AccountDto {
   private String accountNumber;
 
   @JsonFormat(pattern = "yyyy-MM-dd")
-  private Date dateOpened;
+  private LocalDate dateOpened;
 
   @JsonFormat(pattern = "yyyy-MM-dd")
-  private Date dateClosed;
+  private LocalDate dateClosed;
 
   private Boolean isHidden;
 

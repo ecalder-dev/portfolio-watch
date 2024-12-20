@@ -2,7 +2,7 @@ package com.portfoliowatch.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,5 +19,5 @@ public class CostBasisDto {
   @JsonFormat(pattern = "yyyy-MM-dd")
   private BigDecimal totalShares;
 
-  private Date latestTransactionDate;
+  private LocalDate latestTransactionDate;
 }

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.portfoliowatch.util.parser.SchwabDateDeserializer;
 import com.portfoliowatch.util.parser.SchwabMoneyDeserializer;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,7 +15,7 @@ public class BrokerageTransaction {
 
   @JsonProperty("Date")
   @JsonDeserialize(using = SchwabDateDeserializer.class)
-  private Date transactionDate;
+  private LocalDate transactionDate;
 
   @JsonProperty("Action")
   private TransactionAction action;

@@ -14,6 +14,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.UUID;
 import lombok.Data;
@@ -44,7 +45,7 @@ public class LotSale {
 
   @Column(name = "date_acquired")
   @Temporal(TemporalType.DATE)
-  private Date dateAcquired;
+  private LocalDate dateAcquired;
 
   @Column(nullable = false, name = "sold_shares", precision = 20, scale = 5)
   private BigDecimal soldShares;
@@ -57,7 +58,7 @@ public class LotSale {
 
   @Column(name = "date_sold")
   @Temporal(TemporalType.DATE)
-  private Date dateSold;
+  private LocalDate dateSold;
 
   @Column(nullable = false, name = "tax_year")
   private Integer taxYear;

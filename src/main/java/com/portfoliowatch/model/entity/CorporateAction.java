@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 import lombok.Data;
 
@@ -49,7 +50,7 @@ public class CorporateAction implements BaseEvent {
 
   @Column(name = "date_of_event")
   @Temporal(TemporalType.DATE)
-  private Date dateOfEvent;
+  private LocalDate dateOfEvent;
 
   @Column(name = "datetime_created")
   @Temporal(TemporalType.TIMESTAMP)

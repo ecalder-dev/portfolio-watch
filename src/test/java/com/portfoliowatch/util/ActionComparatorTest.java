@@ -9,7 +9,6 @@ import com.portfoliowatch.model.entity.base.BaseEvent;
 import com.portfoliowatch.util.enums.CorporateActionType;
 import com.portfoliowatch.util.enums.TransactionType;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.PriorityQueue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -85,15 +84,11 @@ class ActionComparatorTest {
     assertEquals(entityF.getId(), 1L);
   }
 
-  private Date date(int month, int day, int year) {
+  private LocalDate date(int month, int day, int year) {
     return date(month, day, year, 0, 0, 0);
   }
 
-  private Date date(int month, int day, int year, int hour, int min, int sec) {
-    return Date.from(
-        LocalDate.of(year, month, day)
-            .atTime(hour, min, sec)
-            .atZone(java.time.ZoneId.systemDefault())
-            .toInstant());
+  private LocalDate date(int month, int day, int year, int hour, int min, int sec) {
+    return LocalDate.of(year, month, day).atTime(hour, min, sec).toLocalDate();
   }
 }

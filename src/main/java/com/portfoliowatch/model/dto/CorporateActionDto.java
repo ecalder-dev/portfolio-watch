@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.portfoliowatch.model.entity.CorporateAction;
 import com.portfoliowatch.util.enums.CorporateActionType;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,7 +23,7 @@ public class CorporateActionDto {
   private BigDecimal ratioConsequent;
 
   @JsonFormat(pattern = "yyyy-MM-dd")
-  private Date dateOfEvent;
+  private LocalDate dateOfEvent;
 
   public CorporateActionDto(CorporateAction corporateAction) {
     this.id = corporateAction.getId();

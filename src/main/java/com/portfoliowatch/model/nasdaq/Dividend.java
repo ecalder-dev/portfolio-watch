@@ -1,6 +1,6 @@
 package com.portfoliowatch.model.nasdaq;
 
-import java.util.Date;
+import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 public class Dividend {
 
-  private Date exOrEffDate;
+  private LocalDate exOrEffDate;
   private String type;
   private Double amount;
   private String declarationDate;

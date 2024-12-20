@@ -6,7 +6,7 @@ import com.portfoliowatch.util.enums.Currency;
 import com.portfoliowatch.util.enums.LotSaleType;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -32,10 +32,10 @@ public class LotSaleDto {
   private Map<Currency, BigDecimal> totalPriceDifference = new HashMap<>();
 
   @JsonFormat(pattern = "yyyy-MM-dd")
-  private Date dateAcquired;
+  private LocalDate dateAcquired;
 
   @JsonFormat(pattern = "yyyy-MM-dd")
-  private Date dateSold;
+  private LocalDate dateSold;
 
   private Integer taxYear;
 

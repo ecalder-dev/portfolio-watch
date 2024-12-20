@@ -8,7 +8,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 public class ExchangeRateId implements Serializable {
 
   @Temporal(TemporalType.DATE)
-  private Date date;
+  private LocalDate date;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "from_currency", length = 3)

@@ -11,7 +11,7 @@ import com.portfoliowatch.service.fx.ExchangeRateService;
 import com.portfoliowatch.util.enums.Currency;
 import com.portfoliowatch.util.enums.LotSaleType;
 import java.math.BigDecimal;
-import java.util.Calendar;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -27,26 +27,23 @@ public class LotSaleService {
 
   private final ExchangeRateService exchangeRateService;
 
-  private Map<Date, BigDecimal> dateRatioMap;
+  private Map<LocalDate, BigDecimal> dateRatioMap;
 
   protected void recordLotSold(
       Lot lot,
       BigDecimal soldShares,
       BigDecimal soldPrice,
-      Date dateSold,
+      LocalDate dateSold,
       LotSaleType lotSaleType) {
     // Initialize LotSale object
     LotSale lotSale = new LotSale();
     String symbol = lot.getSymbol();
-    Date dateAcquired = lot.getDateTransacted();
+    LocalDate dateAcquired = lot.getDateTransacted();
     BigDecimal acquisitionPrice = lot.getPrice();
     BigDecimal totalAcquisitionPrice = acquisitionPrice.multiply(soldShares);
     BigDecimal totalSoldPrice = soldPrice.multiply(soldShares);
     BigDecimal totalPriceDifference = totalSoldPrice.subtract(totalAcquisitionPrice);
-
-    Calendar calendar = Calendar.getInstance();
-    calendar.setTime(dateSold);
-    Integer taxYear = calendar.get(Calendar.YEAR);
+    Integer taxYear = dateSold.getYear();
 
     // Set values in lotSale object
     lotSale.setSymbol(symbol);
@@ -94,7 +91,7 @@ public class LotSaleService {
     lotSaleRepository.deleteAll();
   }
 
-  private BigDecimal getYenRate(Map<ExchangeRateId, BigDecimal> dateRateMap, Date date) {
+  private BigDecimal getYenRate(Map<ExchangeRateId, BigDecimal> dateRateMap, LocalDate date) {
     ExchangeRateId exchangeRateId = new ExchangeRateId(date, Currency.USD, Currency.JPY);
     BigDecimal rate = dateRateMap.get(exchangeRateId);
     if (rate == null) {
@@ -128,7 +125,7 @@ public class LotSaleService {
     sourceMap.forEach((currency, value) -> targetMap.merge(currency, value, BigDecimal::add));
   }
 
-  private BigDecimal getYenRate(Date date) {
+  private BigDecimal getYenRate(LocalDate date) {
     if (dateRatioMap == null || dateRatioMap.isEmpty()) {
       dateRatioMap = exchangeRateService.generateDateRateMap();
     }

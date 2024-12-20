@@ -11,6 +11,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import lombok.Data;
@@ -32,11 +33,11 @@ public class Account implements BaseEvent {
 
   @Column(name = "date_opened")
   @Temporal(TemporalType.DATE)
-  private Date dateOpened;
+  private LocalDate dateOpened;
 
   @Column(name = "date_closed")
   @Temporal(TemporalType.DATE)
-  private Date dateClosed;
+  private LocalDate dateClosed;
 
   @Column(name = "is_hidden")
   private Boolean isHidden;

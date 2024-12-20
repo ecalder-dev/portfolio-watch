@@ -15,6 +15,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 import lombok.Data;
 
@@ -38,7 +39,7 @@ public class Transaction implements AssetAction {
 
   @Column(name = "date_transacted")
   @Temporal(TemporalType.DATE)
-  private Date dateTransacted;
+  private LocalDate dateTransacted;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "type", length = 5)

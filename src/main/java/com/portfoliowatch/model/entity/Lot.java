@@ -11,6 +11,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.UUID;
 import lombok.Data;
@@ -37,7 +38,7 @@ public class Lot {
 
   @Column(name = "date_transacted")
   @Temporal(TemporalType.DATE)
-  private Date dateTransacted;
+  private LocalDate dateTransacted;
 
   @ManyToOne
   @JoinColumn(name = "fk_lot_account")

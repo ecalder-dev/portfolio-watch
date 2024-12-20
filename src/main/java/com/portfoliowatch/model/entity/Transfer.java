@@ -12,6 +12,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 import lombok.Data;
 
@@ -32,7 +33,7 @@ public class Transfer implements AssetAction {
 
   @Column(name = "date_transacted")
   @Temporal(TemporalType.DATE)
-  private Date dateTransacted;
+  private LocalDate dateTransacted;
 
   @ManyToOne
   @JoinColumn(name = "fk_transfer_old_account")

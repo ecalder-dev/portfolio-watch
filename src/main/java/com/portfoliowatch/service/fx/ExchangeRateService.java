@@ -9,7 +9,8 @@ import com.portfoliowatch.util.enums.Currency;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,7 +31,7 @@ public class ExchangeRateService {
 
   private final ExchangeRateRepository exchangeRateRepository;
   private final ExchangeRateSourceRepository exchangeRateSourceRepository;
-  private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+  private final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
   public void readCSVUpload(Long exchangeRateSourceId, MultipartFile file) {
     try {
@@ -66,7 +67,7 @@ public class ExchangeRateService {
           continue;
         }
 
-        Date date = dateFormat.parse(dateStr);
+        LocalDate date = LocalDate.parse(dateStr, dateFormat);
         try {
           rate = new BigDecimal(rateStr);
           recentRate = rate;
@@ -88,7 +89,7 @@ public class ExchangeRateService {
     }
   }
 
-  public ExchangeRate getExchangeRate(Date date, Currency fromCurrency, Currency toCurrency) {
+  public ExchangeRate getExchangeRate(LocalDate date, Currency fromCurrency, Currency toCurrency) {
     ExchangeRateId exchangeRateId = new ExchangeRateId();
     exchangeRateId.setDate(date);
     exchangeRateId.setFromCurrency(fromCurrency);
@@ -100,8 +101,8 @@ public class ExchangeRateService {
     return exchangeRateRepository.findById(exchangeRateId).orElse(null);
   }
 
-  public Map<Date, BigDecimal> generateDateRateMap() {
-    Map<Date, BigDecimal> dateRateMap = new HashMap<>();
+  public Map<LocalDate, BigDecimal> generateDateRateMap() {
+    Map<LocalDate, BigDecimal> dateRateMap = new HashMap<>();
     List<ExchangeRate> exchangeRateList = exchangeRateRepository.findAll();
     for (ExchangeRate exchangeRate : exchangeRateList) {
       dateRateMap.put(exchangeRate.getExchangeRateId().getDate(), exchangeRate.getRate());

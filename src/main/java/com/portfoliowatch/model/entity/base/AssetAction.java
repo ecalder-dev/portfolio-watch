@@ -1,7 +1,7 @@
 package com.portfoliowatch.model.entity.base;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 
 public interface AssetAction extends BaseEvent {
 
@@ -13,7 +13,7 @@ public interface AssetAction extends BaseEvent {
 
   void setShares(BigDecimal shares);
 
-  Date getDateTransacted();
+  LocalDate getDateTransacted();
 
-  void setDateTransacted(Date dateTransacted);
+  void setDateTransacted(LocalDate dateTransacted);
 }

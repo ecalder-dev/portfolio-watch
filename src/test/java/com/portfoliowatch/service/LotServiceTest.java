@@ -14,7 +14,7 @@ import com.portfoliowatch.repository.LotRepository;
 import com.portfoliowatch.repository.TransactionRepository;
 import com.portfoliowatch.repository.TransferRepository;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,28 +56,28 @@ public class LotServiceTest {
     account2.setId(2L);
 
     Lot lot1 = new Lot();
-    lot1.setDateTransacted(new Date());
+    lot1.setDateTransacted(LocalDate.now());
     lot1.setSymbol("TEST");
     lot1.setAccount(account1);
     lot1.setId(UUID.randomUUID());
     lot1.setShares(new BigDecimal("1.97"));
 
     Lot lot2 = new Lot();
-    lot2.setDateTransacted(new Date());
+    lot2.setDateTransacted(LocalDate.now());
     lot2.setSymbol("TEST");
     lot2.setAccount(account1);
     lot2.setId(UUID.randomUUID());
     lot2.setShares(new BigDecimal("0.01"));
 
     Lot lot3 = new Lot();
-    lot3.setDateTransacted(new Date());
+    lot3.setDateTransacted(LocalDate.now());
     lot3.setSymbol("TEST");
     lot3.setAccount(account1);
     lot3.setId(UUID.randomUUID());
     lot3.setShares(new BigDecimal("0.01"));
 
     Lot lot4 = new Lot();
-    lot4.setDateTransacted(new Date());
+    lot4.setDateTransacted(LocalDate.now());
     lot4.setSymbol("TEST");
     lot4.setAccount(account1);
     lot4.setId(UUID.randomUUID());
