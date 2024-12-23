@@ -48,31 +48,37 @@ public class LotService {
   private final int SCALE = 5;
   private final RoundingMode ROUNDING = RoundingMode.HALF_UP;
   private final Sort sortByTransactionDate = Sort.by(Sort.Direction.DESC, "dateTransacted");
+  private static final Sort SORT_BY_TRANSACTION_DATE =
+      Sort.by(Sort.Direction.DESC, "dateTransacted");
 
   public List<CostBasisDto> getCostBasis() {
     Set<String> ownedStocks = getOwnedStocks();
-    List<CostBasisDto> costBasisDtoList = new LinkedList<>();
-    for (String symbol : ownedStocks) {
-      List<Lot> ownedLots =
-          lotRepository.findAllBySymbolAndSharesGreaterThan(
-              sortByTransactionDate, symbol, BigDecimal.ZERO);
-      if (!ownedLots.isEmpty()) {
-        BigDecimal adjustedPrice = BigDecimal.ZERO;
-        BigDecimal totalShares = BigDecimal.ZERO;
-        CostBasisDto costBasisDto = new CostBasisDto();
-        costBasisDto.setLatestTransactionDate(ownedLots.get(0).getDateTransacted());
-        costBasisDto.setSymbol(symbol);
-        for (Lot lot : ownedLots) {
-          adjustedPrice = adjustedPrice.add(lot.getPrice().multiply(lot.getShares()));
-          totalShares = totalShares.add(lot.getShares());
-        }
-        costBasisDto.setAdjustedPrice(adjustedPrice.divide(totalShares, SCALE, ROUNDING));
-        costBasisDto.setTotalShares(totalShares.setScale(SCALE, ROUNDING));
-        costBasisDto.setLotList(ownedLots.stream().map(LotDto::new).collect(Collectors.toList()));
-        costBasisDtoList.add(costBasisDto);
-      }
+    return ownedStocks.stream()
+        .map(this::calculateCostBasis)
+        .filter(costBasisDto -> costBasisDto != null)
+        .collect(Collectors.toList());
+  }
+
+  private CostBasisDto calculateCostBasis(String symbol) {
+    List<Lot> ownedLots =
+        lotRepository.findAllBySymbolAndSharesGreaterThan(
+            SORT_BY_TRANSACTION_DATE, symbol, BigDecimal.ZERO);
+    if (ownedLots.isEmpty()) {
+      return null;
     }
-    return costBasisDtoList;
+    BigDecimal adjustedPrice = BigDecimal.ZERO;
+    BigDecimal totalShares = BigDecimal.ZERO;
+    CostBasisDto costBasisDto = new CostBasisDto();
+    costBasisDto.setLatestTransactionDate(ownedLots.get(0).getDateTransacted());
+    costBasisDto.setSymbol(symbol);
+    for (Lot lot : ownedLots) {
+      adjustedPrice = adjustedPrice.add(lot.getPrice().multiply(lot.getShares()));
+      totalShares = totalShares.add(lot.getShares());
+    }
+    costBasisDto.setAdjustedPrice(adjustedPrice.divide(totalShares, SCALE, ROUNDING));
+    costBasisDto.setTotalShares(totalShares.setScale(SCALE, ROUNDING));
+    costBasisDto.setLotList(ownedLots.stream().map(LotDto::new).collect(Collectors.toList()));
+    return costBasisDto;
   }
 
   public Set<String> getOwnedStocks() {
@@ -93,20 +99,22 @@ public class LotService {
    *     shares to sell, the associated account, and the transaction date.
    */
   public void reduceLotsWith(Transaction transaction) {
-    // Make sure to sort by transacted date.
+    if (transaction == null) {
+      log.error("Transaction is null");
+      return;
+    }
     Queue<Lot> lotQueue =
         new LinkedList<>(
             lotRepository.findBySymbolAndAccountAndSharesGreaterThanOrderByDateTransactedAsc(
                 transaction.getSymbol(), transaction.getAccount(), BigDecimal.ZERO));
     if (lotQueue.isEmpty()) {
-      log.error("THERE ARE NO LOTS!");
+      log.error("No lots available for transaction: {}", transaction);
       return;
     }
     BigDecimal sharesToSell = transaction.getShares();
     Lot lot = lotQueue.poll();
     while (sharesToSell.compareTo(BigDecimal.ZERO) > 0 && lot != null) {
       if (sharesToSell.compareTo(lot.getShares()) >= 0) {
-        // Reduce shares and remove lot.
         sharesToSell = sharesToSell.subtract(lot.getShares());
         lotSaleService.recordLotSold(
             lot,
@@ -116,10 +124,9 @@ public class LotService {
             LotSaleType.TRANSACTIONAL);
         lot.setShares(BigDecimal.ZERO);
         lotRepository.save(lot);
-        log.debug("Lot was cleared for: " + transaction);
+        log.debug("Lot was cleared for: {}", transaction);
         lot = lotQueue.poll();
       } else {
-        // Update lot and set sharesToSell to 0.
         lot.setShares(lot.getShares().subtract(sharesToSell).setScale(SCALE, ROUNDING));
         lot.setDatetimeUpdated(transaction.getDatetimeUpdated());
         lotSaleService.recordLotSold(
@@ -129,13 +136,12 @@ public class LotService {
             transaction.getDateTransacted(),
             LotSaleType.TRANSACTIONAL);
         lotRepository.save(lot);
-        log.debug("Lot was updated for: " + transaction);
+        log.debug("Lot was updated for: {}", transaction);
         sharesToSell = BigDecimal.ZERO;
       }
     }
-    // There are shares left to sell but no lots to take from.
     if (sharesToSell.compareTo(BigDecimal.ZERO) > 0) {
-      log.error("NO LOTS LEFT TO SELL");
+      log.error("No lots left to sell for transaction: {}", transaction);
     }
   }
 
@@ -151,6 +157,10 @@ public class LotService {
    *     be assigned to the new lot.
    */
   public void createLotWith(Transaction transaction) {
+    if (transaction == null) {
+      log.error("Transaction is null");
+      return;
+    }
     Lot lot = new Lot();
     lot.setSymbol(transaction.getSymbol());
     lot.setPrice(transaction.getPrice());
@@ -159,7 +169,7 @@ public class LotService {
     lot.setDateTransacted(transaction.getDateTransacted());
     lot.setDatetimeUpdated(new Date());
     lot.setDatetimeCreated(new Date());
-    log.debug("Lot was created for: " + transaction);
+    log.debug("Lot was created for: {}", transaction);
     lotRepository.save(lot);
   }
 
@@ -174,20 +184,23 @@ public class LotService {
    *     transferred.
    */
   public void transferLotsWith(Transfer transfer) {
+    if (transfer == null) {
+      log.error("Transfer is null");
+      return;
+    }
     List<Lot> oldAccountLots =
         new LinkedList<>(
             lotRepository.findBySymbolAndAccountAndSharesGreaterThanOrderByDateTransactedAsc(
                 transfer.getSymbol(), transfer.getFromAccount(), BigDecimal.ZERO));
     log.debug(
-        String.format(
-            "Transferring [%s] from Account[id=%d] to  Account[id=%d]",
-            transfer.getSymbol(),
-            transfer.getFromAccount().getId(),
-            transfer.getToAccount().getId()));
+        "Transferring [{}] from Account[id={}] to Account[id={}]",
+        transfer.getSymbol(),
+        transfer.getFromAccount().getId(),
+        transfer.getToAccount().getId());
     log.debug(
-        String.format(
-            "Attempting to transfer [%s] stocks from a existing [%s]",
-            transfer.getShares(), getTotalShares(transfer.getFromAccount(), transfer.getSymbol())));
+        "Attempting to transfer [{}] stocks from existing [{}]",
+        transfer.getShares(),
+        getTotalShares(transfer.getFromAccount(), transfer.getSymbol()));
     oldAccountLots.sort(Comparator.comparing(Lot::getDateTransacted));
     Queue<Lot> lotQueue = new LinkedList<>(oldAccountLots);
 
@@ -195,26 +208,22 @@ public class LotService {
     Lot lot = lotQueue.poll();
     while (sharesToTransfer.compareTo(BigDecimal.ZERO) > 0 && lot != null) {
       if (sharesToTransfer.compareTo(lot.getShares()) >= 0) {
-        // Remove lot and reduce shares
         lot.setAccount(transfer.getToAccount());
         lot.setDatetimeUpdated(new Date());
         sharesToTransfer = sharesToTransfer.subtract(lot.getShares());
         log.debug(
-            String.format(
-                "Lot id [%s] was transferred to account [%s (%s)]",
-                lot.getId(),
-                transfer.getToAccount().getAccountName(),
-                transfer.getToAccount().getId()));
+            "Lot id [{}] was transferred to account [{} ({})]",
+            lot.getId(),
+            transfer.getToAccount().getAccountName(),
+            transfer.getToAccount().getId());
         lotRepository.save(lot);
         lot = lotQueue.poll();
       } else {
-        // Update lot with reduced shares.
         BigDecimal sharesToStay = lot.getShares().subtract(sharesToTransfer);
         lot.setShares(sharesToStay);
         lot.setDatetimeUpdated(new Date());
         lotRepository.save(lot);
 
-        // Move the rest to new Lot.
         Lot newLot = new Lot();
         newLot.setShares(sharesToTransfer);
         newLot.setSymbol(lot.getSymbol());
@@ -225,7 +234,6 @@ public class LotService {
         newLot.setPrice(lot.getPrice());
         lotRepository.save(newLot);
 
-        // Set shares pending to 0.
         sharesToTransfer = BigDecimal.ZERO;
       }
     }
@@ -247,6 +255,10 @@ public class LotService {
    *     - `price`: The price of the shares after the corporate action.
    */
   public void mergeSplitLotsWith(CorporateAction action) {
+    if (action == null) {
+      log.error("Corporate action is null");
+      return;
+    }
     List<Account> accounts = accountRepository.findAll();
     for (Account account : accounts) {
       List<Lot> affectedLots =
@@ -256,26 +268,25 @@ public class LotService {
           action.getRatioConsequent().divide(action.getRatioAntecedent(), SCALE, ROUNDING);
       BigDecimal totalOriginalShares = BigDecimal.ZERO;
       BigDecimal totalLotPrice = BigDecimal.ZERO;
-      BigDecimal totalNewShares;
       if (affectedLots.isEmpty()) {
         continue;
       }
       for (Lot lot : affectedLots) {
         totalOriginalShares = totalOriginalShares.add(lot.getShares());
         totalLotPrice = totalLotPrice.add(lot.getShares().multiply(lot.getPrice()));
-        // Update current lot.
         lot.setShares(BigDecimal.ZERO);
         lot.setDatetimeUpdated(new Date());
       }
-      totalNewShares = totalOriginalShares.multiply(multiplier);
+      BigDecimal totalNewShares = totalOriginalShares.multiply(multiplier);
       log.debug(
-          String.format(
-              "Total of %s shares of %s was converted to %s shares of %s",
-              totalOriginalShares, action.getOldSymbol(), totalNewShares, action.getNewSymbol()));
+          "Total of {} shares of {} was converted to {} shares of {}",
+          totalOriginalShares,
+          action.getOldSymbol(),
+          totalNewShares,
+          action.getNewSymbol());
       BigDecimal sharesWhole = totalNewShares.setScale(0, RoundingMode.FLOOR);
       BigDecimal sharesPartials = totalNewShares.remainder(BigDecimal.ONE);
       BigDecimal newPrice = totalLotPrice.divide(totalNewShares, SCALE, ROUNDING);
-      // If there are partials, sell them.
 
       lotRepository.saveAll(affectedLots);
 
@@ -311,6 +322,10 @@ public class LotService {
    *     ratio of shares before the split. - `ratioConsequent`: The ratio of shares after the split.
    */
   public void splitLotsWith(CorporateAction action) {
+    if (action == null) {
+      log.error("Corporate action is null");
+      return;
+    }
     List<Account> accounts = accountRepository.findAll();
     for (Account account : accounts) {
       List<Lot> affectedLots =
@@ -319,46 +334,52 @@ public class LotService {
       BigDecimal multiplier =
           action.getRatioConsequent().divide(action.getRatioAntecedent(), SCALE, ROUNDING);
       for (Lot lot : affectedLots) {
-        BigDecimal currentShares = lot.getShares();
-        BigDecimal currentSharesPartials = currentShares.remainder(BigDecimal.ONE);
-        BigDecimal newShares = lot.getShares().multiply(multiplier).setScale(SCALE, ROUNDING);
-        BigDecimal newSharesWhole = newShares.setScale(0, RoundingMode.FLOOR);
-        BigDecimal newSharesPartials = newShares.remainder(BigDecimal.ONE);
-        BigDecimal newPrice = lot.getPrice().divide(multiplier, SCALE, ROUNDING);
-        BigDecimal sharesToSell;
-
-        // If the original share is less than 1 and the new share is also less than 1, sell the
-        // difference as CIL.
-        if (currentShares.compareTo(BigDecimal.ONE) < 0
-            && newShares.compareTo(BigDecimal.ONE) < 0) {
-          if (newSharesPartials.compareTo(currentSharesPartials) > 0) {
-            // If the new share partial is larger, sell the difference while setting original
-            lot.setShares(currentShares);
-            sharesToSell = newSharesPartials.subtract(currentSharesPartials);
-          } else {
-            // Otherwise, sell all partials.
-            lot.setShares(BigDecimal.ZERO);
-            sharesToSell = newShares;
-          }
-        } else {
-          lot.setShares(newSharesWhole);
-          sharesToSell = newSharesPartials;
-        }
-        lot.setPrice(newPrice);
-        lot.setDatetimeUpdated(new Date());
-        // If there are shares to sell, sell them
-        if (sharesToSell.compareTo(BigDecimal.ZERO) > 0) {
-          lotSaleService.recordLotSold(
-              lot,
-              sharesToSell,
-              action.getOriginalPrice(),
-              action.getDateOfEvent(),
-              LotSaleType.SPLIT_PARTIAL);
-        }
+        processLotSplit(lot, multiplier, action);
       }
-
       lotRepository.saveAll(affectedLots);
     }
+  }
+
+  private void processLotSplit(Lot lot, BigDecimal multiplier, CorporateAction action) {
+    if (lot == null || multiplier == null || action == null) {
+      log.error("Invalid parameters for processing lot split");
+      return;
+    }
+
+    BigDecimal currentShares = lot.getShares();
+    BigDecimal currentSharesPartials = currentShares.remainder(BigDecimal.ONE);
+    BigDecimal newShares = lot.getShares().multiply(multiplier).setScale(SCALE, ROUNDING);
+    BigDecimal newSharesWhole = newShares.setScale(0, RoundingMode.FLOOR);
+    BigDecimal newSharesPartials = newShares.remainder(BigDecimal.ONE);
+    BigDecimal newPrice = lot.getPrice().divide(multiplier, SCALE, ROUNDING);
+    BigDecimal sharesToSell = BigDecimal.ZERO;
+
+    if (currentShares.compareTo(BigDecimal.ONE) < 0 && newShares.compareTo(BigDecimal.ONE) < 0) {
+      if (newSharesPartials.compareTo(currentSharesPartials) > 0) {
+        lot.setShares(currentShares);
+        sharesToSell = newSharesPartials.subtract(currentSharesPartials);
+      } else {
+        lot.setShares(BigDecimal.ZERO);
+        sharesToSell = newShares;
+      }
+    } else {
+      lot.setShares(newSharesWhole);
+    }
+
+    lot.setPrice(newPrice);
+    lot.setDatetimeUpdated(new Date());
+    lotRepository.save(lot);
+
+    if (sharesToSell.compareTo(BigDecimal.ZERO) > 0) {
+      lotSaleService.recordLotSold(
+          lot, sharesToSell, newPrice, action.getDateOfEvent(), LotSaleType.SPLIT_PARTIAL);
+    }
+
+    log.info(
+        "Processed lot split for lot: {}, new shares: {}, new price: {}",
+        lot.getId(),
+        newShares,
+        newPrice);
   }
 
   /**
@@ -379,6 +400,10 @@ public class LotService {
    *     stock after the spin-off. - `dateOfEvent`: The date of the corporate action event.
    */
   public void spinOffLotsWith(CorporateAction action) {
+    if (action == null) {
+      log.error("Corporate action is null");
+      return;
+    }
     List<Account> accounts = accountRepository.findAll();
     for (Account account : accounts) {
       Date now = new Date();
@@ -420,7 +445,7 @@ public class LotService {
         lot.setDateTransacted(action.getDateOfEvent());
         lotRepository.save(lot);
 
-        // Sell of partials for the new lot.
+        // Sell off remaining partial shares
         if (spinOffWhole.compareTo(BigDecimal.ZERO) > 0) {
           lotSaleService.recordLotSold(
               lot,
@@ -460,7 +485,6 @@ public class LotService {
     lotSaleService.deleteAll();
     lotRepository.deleteAll();
 
-    // Get all transactions and actions.
     PriorityQueue<BaseEvent> queue = getAllBaseEventsAsQueue();
 
     while (!queue.isEmpty()) {
@@ -472,8 +496,8 @@ public class LotService {
             || transaction.getType() == TransactionType.GIFT) {
           createLotWith(transaction);
         }
-      } else if (entity instanceof Transfer) {
-        transferLotsWith((Transfer) entity);
+      } else if (entity instanceof Transfer transfer) {
+        transferLotsWith(transfer);
       } else if (entity instanceof CorporateAction corporateAction) {
         CorporateActionType type = corporateAction.getType();
         if (type == CorporateActionType.MERGE) {
@@ -518,13 +542,32 @@ public class LotService {
     return queue;
   }
 
+  /**
+   * Processes a list of brokerage transactions from Schwab and converts them into corresponding
+   * transactions, transfers, and corporate actions in the system. If `isSimulation` is false, the
+   * method saves the processed events to the database and rebuilds all lots.
+   *
+   * @param brokerageTransactionList The list of brokerage transactions to process.
+   * @param targetAccountId The ID of the target account for transactions.
+   * @param transferAccountId The ID of the account to transfer shares to.
+   * @param isSimulation If true, the method simulates the processing without saving to the
+   *     database.
+   * @return A list of processed base events (transactions, transfers, and corporate actions).
+   */
   public List<BaseEvent> processSchwabTransactions(
       List<BrokerageTransaction> brokerageTransactionList,
       Long targetAccountId,
       Long transferAccountId,
       boolean isSimulation) {
+
     Account targetAccount = accountRepository.findById(targetAccountId).orElse(null);
     Account accountToTransfer = accountRepository.findById(transferAccountId).orElse(null);
+
+    if (targetAccount == null || accountToTransfer == null) {
+      log.error("Target account or transfer account is null");
+      return List.of();
+    }
+
     List<BaseEvent> events = new LinkedList<>();
     List<Transaction> transactions = new LinkedList<>();
     List<Transfer> transfers = new LinkedList<>();
@@ -532,63 +575,34 @@ public class LotService {
 
     for (BrokerageTransaction brokerageTransaction : brokerageTransactionList) {
       if (brokerageTransaction.getAction() == null) {
+        log.warn("Skipping transaction with null action: {}", brokerageTransaction);
         continue;
       }
       switch (brokerageTransaction.getAction()) {
-        case BUY -> {
-          Transaction buyTransaction = new Transaction();
-          buyTransaction.setType(TransactionType.BUY);
-          buyTransaction.setAccount(targetAccount);
-          buyTransaction.setSymbol(brokerageTransaction.getSymbol());
-          buyTransaction.setPrice(brokerageTransaction.getPrice());
-          buyTransaction.setShares(brokerageTransaction.getQuantity());
-          buyTransaction.setDateTransacted(brokerageTransaction.getTransactionDate());
-          buyTransaction.setDatetimeCreated(new Date());
-          buyTransaction.setDatetimeUpdated(buyTransaction.getDatetimeCreated());
-          transactions.add(buyTransaction);
-        }
-        case SELL -> {
-          Transaction sellTransaction = new Transaction();
-          sellTransaction.setType(TransactionType.SELL);
-          sellTransaction.setAccount(targetAccount);
-          sellTransaction.setSymbol(brokerageTransaction.getSymbol());
-          sellTransaction.setPrice(brokerageTransaction.getPrice());
-          sellTransaction.setShares(brokerageTransaction.getQuantity());
-          sellTransaction.setDateTransacted(brokerageTransaction.getTransactionDate());
-          sellTransaction.setDatetimeCreated(new Date());
-          sellTransaction.setDatetimeUpdated(sellTransaction.getDatetimeCreated());
-          transactions.add(sellTransaction);
-        }
+        case BUY ->
+            transactions.add(
+                createTransactionFromBrokerageTransaction(
+                    brokerageTransaction, targetAccount, TransactionType.BUY));
+        case SELL ->
+            transactions.add(
+                createTransactionFromBrokerageTransaction(
+                    brokerageTransaction, targetAccount, TransactionType.SELL));
         case TRANSFER -> {
           if (brokerageTransaction.getSymbol() != null
               && !brokerageTransaction.getSymbol().isEmpty()
               && brokerageTransaction.getQuantity() != null) {
-            Transfer transfer = new Transfer();
-            transfer.setSymbol(brokerageTransaction.getSymbol());
-            transfer.setShares(brokerageTransaction.getQuantity());
-            transfer.setFromAccount(targetAccount);
-            transfer.setToAccount(accountToTransfer);
-            transfer.setDateTransacted(brokerageTransaction.getTransactionDate());
-            transfer.setDatetimeCreated(new Date());
-            transfer.setDatetimeUpdated(transfer.getDatetimeCreated());
-            transfers.add(transfer);
+            transfers.add(
+                createTransferFromBrokerageTransaction(
+                    brokerageTransaction, targetAccount, accountToTransfer));
           }
         }
-        case SPLIT -> {
-          CorporateAction corporateAction = new CorporateAction();
-          corporateAction.setType(CorporateActionType.SPLIT);
-          corporateAction.setRatioAntecedent(BigDecimal.ZERO);
-          corporateAction.setRatioConsequent(BigDecimal.ZERO);
-          corporateAction.setOldSymbol(brokerageTransaction.getSymbol());
-          corporateAction.setNewSymbol(brokerageTransaction.getSymbol());
-          corporateAction.setDateOfEvent(brokerageTransaction.getTransactionDate());
-          corporateAction.setDatetimeCreated(new Date());
-          corporateAction.setDatetimeUpdated(corporateAction.getDatetimeCreated());
-          corporateActions.add(corporateAction);
-        }
-        default -> {}
+        case SPLIT ->
+            corporateActions.add(
+                createCorporateActionFromBrokerageTransaction(brokerageTransaction));
+        default -> log.warn("Unknown action type: {}", brokerageTransaction.getAction());
       }
     }
+
     events.addAll(transactions);
     events.addAll(transfers);
     events.addAll(corporateActions);
@@ -599,6 +613,51 @@ public class LotService {
       corporateActionRepository.saveAll(corporateActions);
       rebuildAllLots();
     }
+
     return events;
+  }
+
+  private Transaction createTransactionFromBrokerageTransaction(
+      BrokerageTransaction brokerageTransaction, Account account, TransactionType type) {
+    Transaction transaction = new Transaction();
+    transaction.setType(type);
+    transaction.setAccount(account);
+    transaction.setSymbol(brokerageTransaction.getSymbol());
+    transaction.setPrice(brokerageTransaction.getPrice());
+    transaction.setShares(brokerageTransaction.getQuantity());
+    transaction.setDateTransacted(brokerageTransaction.getTransactionDate());
+    transaction.setDatetimeCreated(new Date());
+    transaction.setDatetimeUpdated(transaction.getDatetimeCreated());
+    log.debug("Created transaction: {}", transaction);
+    return transaction;
+  }
+
+  private Transfer createTransferFromBrokerageTransaction(
+      BrokerageTransaction brokerageTransaction, Account fromAccount, Account toAccount) {
+    Transfer transfer = new Transfer();
+    transfer.setSymbol(brokerageTransaction.getSymbol());
+    transfer.setShares(brokerageTransaction.getQuantity());
+    transfer.setFromAccount(fromAccount);
+    transfer.setToAccount(toAccount);
+    transfer.setDateTransacted(brokerageTransaction.getTransactionDate());
+    transfer.setDatetimeCreated(new Date());
+    transfer.setDatetimeUpdated(transfer.getDatetimeCreated());
+    log.debug("Created transfer: {}", transfer);
+    return transfer;
+  }
+
+  private CorporateAction createCorporateActionFromBrokerageTransaction(
+      BrokerageTransaction brokerageTransaction) {
+    CorporateAction corporateAction = new CorporateAction();
+    corporateAction.setType(CorporateActionType.SPLIT);
+    corporateAction.setRatioAntecedent(BigDecimal.ZERO);
+    corporateAction.setRatioConsequent(BigDecimal.ZERO);
+    corporateAction.setOldSymbol(brokerageTransaction.getSymbol());
+    corporateAction.setNewSymbol(brokerageTransaction.getSymbol());
+    corporateAction.setDateOfEvent(brokerageTransaction.getTransactionDate());
+    corporateAction.setDatetimeCreated(new Date());
+    corporateAction.setDatetimeUpdated(corporateAction.getDatetimeCreated());
+    log.debug("Created corporate action: {}", corporateAction);
+    return corporateAction;
   }
 }

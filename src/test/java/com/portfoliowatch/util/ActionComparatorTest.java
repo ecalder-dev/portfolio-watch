@@ -58,11 +58,6 @@ class ActionComparatorTest {
     testQueue.add(transfer1);
     testQueue.add(buyTransaction);
 
-    /*while (!testQueue.isEmpty()) {
-        BaseEvent entityA = testQueue.poll();
-        System.out.println(entityA.toString());
-    }*/
-
     BaseEvent entityA = testQueue.poll();
     BaseEvent entityB = testQueue.poll();
     BaseEvent entityC = testQueue.poll();

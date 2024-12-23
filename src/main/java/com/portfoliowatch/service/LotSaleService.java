@@ -44,7 +44,6 @@ public class LotSaleService {
     BigDecimal totalSoldPrice = soldPrice.multiply(soldShares);
     BigDecimal totalPriceDifference = totalSoldPrice.subtract(totalAcquisitionPrice);
     Integer taxYear = dateSold.getYear();
-
     // Set values in lotSale object
     lotSale.setSymbol(symbol);
     lotSale.setType(lotSaleType);
@@ -123,13 +122,5 @@ public class LotSaleService {
   private void mergePriceMap(
       Map<Currency, BigDecimal> sourceMap, Map<Currency, BigDecimal> targetMap) {
     sourceMap.forEach((currency, value) -> targetMap.merge(currency, value, BigDecimal::add));
-  }
-
-  private BigDecimal getYenRate(LocalDate date) {
-    if (dateRatioMap == null || dateRatioMap.isEmpty()) {
-      dateRatioMap = exchangeRateService.generateDateRateMap();
-    }
-    BigDecimal rate = dateRatioMap.get(date);
-    return rate != null ? rate : BigDecimal.ZERO;
   }
 }
