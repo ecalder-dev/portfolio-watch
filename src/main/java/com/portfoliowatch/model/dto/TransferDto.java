@@ -1,6 +1,8 @@
 package com.portfoliowatch.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.portfoliowatch.model.dto.deserializer.LocalDateDeserializer;
 import com.portfoliowatch.model.entity.Account;
 import com.portfoliowatch.model.entity.Transfer;
 import java.math.BigDecimal;
@@ -18,6 +20,7 @@ public class TransferDto {
   private BigDecimal shares;
 
   @JsonFormat(pattern = "yyyy-MM-dd")
+  @JsonDeserialize(using = LocalDateDeserializer.class)
   private LocalDate dateTransacted;
 
   private AccountDto fromAccount;

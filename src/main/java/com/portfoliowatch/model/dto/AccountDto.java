@@ -1,6 +1,8 @@
 package com.portfoliowatch.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.portfoliowatch.model.dto.deserializer.LocalDateDeserializer;
 import com.portfoliowatch.model.entity.Account;
 import java.time.LocalDate;
 import java.util.Date;
@@ -16,9 +18,11 @@ public class AccountDto {
   private String accountNumber;
 
   @JsonFormat(pattern = "yyyy-MM-dd")
+  @JsonDeserialize(using = LocalDateDeserializer.class)
   private LocalDate dateOpened;
 
   @JsonFormat(pattern = "yyyy-MM-dd")
+  @JsonDeserialize(using = LocalDateDeserializer.class)
   private LocalDate dateClosed;
 
   private Boolean isHidden;

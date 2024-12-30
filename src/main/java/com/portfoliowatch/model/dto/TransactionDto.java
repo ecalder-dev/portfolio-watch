@@ -1,6 +1,8 @@
 package com.portfoliowatch.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.portfoliowatch.model.dto.deserializer.LocalDateDeserializer;
 import com.portfoliowatch.model.entity.Account;
 import com.portfoliowatch.model.entity.Transaction;
 import com.portfoliowatch.util.enums.TransactionType;
@@ -19,6 +21,7 @@ public class TransactionDto {
   private BigDecimal shares;
 
   @JsonFormat(pattern = "yyyy-MM-dd")
+  @JsonDeserialize(using = LocalDateDeserializer.class)
   private LocalDate dateTransacted;
 
   private TransactionType type;

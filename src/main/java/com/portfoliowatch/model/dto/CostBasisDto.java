@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.portfoliowatch.model.dto.deserializer.LocalDateDeserializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,12 +15,10 @@ import lombok.NoArgsConstructor;
 public class CostBasisDto {
   private String symbol;
   private List<LotDto> lotList;
-
-  @JsonFormat(pattern = "yyyy-MM-dd")
   private BigDecimal adjustedPrice;
-
-  @JsonFormat(pattern = "yyyy-MM-dd")
   private BigDecimal totalShares;
 
+  @JsonFormat(pattern = "yyyy-MM-dd")
+  @JsonDeserialize(using = LocalDateDeserializer.class)
   private LocalDate latestTransactionDate;
 }

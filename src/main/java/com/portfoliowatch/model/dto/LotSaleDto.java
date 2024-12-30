@@ -1,6 +1,8 @@
 package com.portfoliowatch.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.portfoliowatch.model.dto.deserializer.LocalDateDeserializer;
 import com.portfoliowatch.model.entity.LotSale;
 import com.portfoliowatch.util.enums.Currency;
 import com.portfoliowatch.util.enums.LotSaleType;
@@ -32,9 +34,11 @@ public class LotSaleDto {
   private Map<Currency, BigDecimal> totalPriceDifference = new HashMap<>();
 
   @JsonFormat(pattern = "yyyy-MM-dd")
+  @JsonDeserialize(using = LocalDateDeserializer.class)
   private LocalDate dateAcquired;
 
   @JsonFormat(pattern = "yyyy-MM-dd")
+  @JsonDeserialize(using = LocalDateDeserializer.class)
   private LocalDate dateSold;
 
   private Integer taxYear;
