@@ -82,6 +82,15 @@ public class LotSaleService {
     return lotSaleDtoList;
   }
 
+  public Map<Integer, AggregatedAnnualSaleDto> getAllAggregatedAnnualSales() {
+    List<Integer> years = getAllAvailableTaxYears();
+    Map<Integer, AggregatedAnnualSaleDto> aggregatedAnnualSaleDtoMap = new HashMap<>();
+    for (Integer year: years) {
+      aggregatedAnnualSaleDtoMap.put(year,  generateAggregatedAnnualSaleDto(getLotSalesByYear(year)));
+    }
+    return aggregatedAnnualSaleDtoMap;
+  }
+
   public AggregatedAnnualSaleDto getAggregatedAnnualSaleByYear(Integer year) {
     return generateAggregatedAnnualSaleDto(getLotSalesByYear(year));
   }
@@ -103,15 +112,11 @@ public class LotSaleService {
 
   private AggregatedAnnualSaleDto generateAggregatedAnnualSaleDto(List<LotSaleDto> lotSaleDtoList) {
     AggregatedAnnualSaleDto aggregatedAnnualSaleDto = new AggregatedAnnualSaleDto();
-    // Iterate over the lotSaleDtoList once
     for (LotSaleDto lotSaleDto : lotSaleDtoList) {
-      // Merge acquisition prices
       mergePriceMap(
           lotSaleDto.getTotalAcquisitionPrice(),
           aggregatedAnnualSaleDto.getTotalAcquisitionPrice());
-      // Merge sold prices
       mergePriceMap(lotSaleDto.getTotalSoldPrice(), aggregatedAnnualSaleDto.getTotalSoldPrice());
-      // Merge price differences (realized gain/loss)
       mergePriceMap(
           lotSaleDto.getTotalPriceDifference(), aggregatedAnnualSaleDto.getTotalRealizedGainLoss());
     }
