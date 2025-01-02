@@ -302,7 +302,7 @@ public class LotService {
 
       if (sharesPartials.compareTo(BigDecimal.ZERO) > 0) {
         lotSaleService.recordLotSold(
-            newLot, sharesPartials, newPrice, action.getDateOfEvent(), LotSaleType.MERGE_PARTIAL);
+            newLot, sharesPartials, action.getOriginalPrice(), action.getDateOfEvent(), LotSaleType.MERGE_PARTIAL);
       }
     }
   }
@@ -372,7 +372,7 @@ public class LotService {
 
     if (sharesToSell.compareTo(BigDecimal.ZERO) > 0) {
       lotSaleService.recordLotSold(
-          lot, sharesToSell, newPrice, action.getDateOfEvent(), LotSaleType.SPLIT_PARTIAL);
+          lot, sharesToSell, action.getOriginalPrice(), action.getDateOfEvent(), LotSaleType.SPLIT_PARTIAL);
     }
 
     log.info(
@@ -526,7 +526,7 @@ public class LotService {
     return lots.stream()
         .map(Lot::getShares)
         .reduce(BigDecimal.ZERO, BigDecimal::add)
-        .setScale(SCALE, ROUNDING); // Sum all the BigDecimal values
+        .setScale(SCALE, ROUNDING);
   }
 
   private PriorityQueue<BaseEvent> getAllBaseEventsAsQueue() {
