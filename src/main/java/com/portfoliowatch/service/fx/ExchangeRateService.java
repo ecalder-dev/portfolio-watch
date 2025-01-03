@@ -6,6 +6,7 @@ import com.portfoliowatch.model.entity.fx.ExchangeRateSource;
 import com.portfoliowatch.repository.fx.ExchangeRateRepository;
 import com.portfoliowatch.repository.fx.ExchangeRateSourceRepository;
 import com.portfoliowatch.util.enums.Currency;
+import jakarta.validation.constraints.NotNull;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -89,7 +90,31 @@ public class ExchangeRateService {
     }
   }
 
-  public ExchangeRate getExchangeRate(LocalDate date, Currency fromCurrency, Currency toCurrency) {
+  public List<ExchangeRate> getExchangeRateByDateRange(
+      @NotNull Currency fromCurrency,
+      @NotNull Currency toCurrency,
+      LocalDate fromDate,
+      LocalDate toDate) {
+    if (fromDate == null && toDate == null) {
+      return exchangeRateRepository.findAllByCurrency(fromCurrency, toCurrency);
+    }
+    if (fromDate != null && toDate == null) {
+      return exchangeRateRepository.findAllByCurrencyDateRangeAfterInclusive(
+          fromCurrency, toCurrency, fromDate);
+    }
+    if (fromDate == null) {
+      return exchangeRateRepository.findAllByCurrencyDateRangeBeforeInclusive(
+          fromCurrency, toCurrency, toDate);
+    }
+    if (fromDate.isAfter(toDate)) {
+      throw new IllegalArgumentException(
+          String.format("fromDate [%s] cannot after the toDate [%s]", fromDate, toDate));
+    }
+    return exchangeRateRepository.findAllByCurrencyAndDateRange(
+        fromCurrency, toCurrency, fromDate, toDate);
+  }
+
+  public ExchangeRate getExchangeRate(Currency fromCurrency, Currency toCurrency, LocalDate date) {
     ExchangeRateId exchangeRateId = new ExchangeRateId();
     exchangeRateId.setDate(date);
     exchangeRateId.setFromCurrency(fromCurrency);
