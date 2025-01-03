@@ -85,8 +85,9 @@ public class LotSaleService {
   public Map<Integer, AggregatedAnnualSaleDto> getAllAggregatedAnnualSales() {
     List<Integer> years = getAllAvailableTaxYears();
     Map<Integer, AggregatedAnnualSaleDto> aggregatedAnnualSaleDtoMap = new HashMap<>();
-    for (Integer year: years) {
-      aggregatedAnnualSaleDtoMap.put(year,  generateAggregatedAnnualSaleDto(getLotSalesByYear(year)));
+    for (Integer year : years) {
+      aggregatedAnnualSaleDtoMap.put(
+          year, generateAggregatedAnnualSaleDto(getLotSalesByYear(year)));
     }
     return aggregatedAnnualSaleDtoMap;
   }

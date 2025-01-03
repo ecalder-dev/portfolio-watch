@@ -47,6 +47,6 @@ spotlessCheck:
 	$(MAVEN) spotless:check
 
 # Fix format
-.PHONY: spotlessFix
-spotlessFix:
+.PHONY: spotlessApply
+spotlessApply:
 	$(MAVEN) spotless:apply

@@ -302,7 +302,11 @@ public class LotService {
 
       if (sharesPartials.compareTo(BigDecimal.ZERO) > 0) {
         lotSaleService.recordLotSold(
-            newLot, sharesPartials, action.getOriginalPrice(), action.getDateOfEvent(), LotSaleType.MERGE_PARTIAL);
+            newLot,
+            sharesPartials,
+            action.getOriginalPrice(),
+            action.getDateOfEvent(),
+            LotSaleType.MERGE_PARTIAL);
       }
     }
   }
@@ -372,7 +376,11 @@ public class LotService {
 
     if (sharesToSell.compareTo(BigDecimal.ZERO) > 0) {
       lotSaleService.recordLotSold(
-          lot, sharesToSell, action.getOriginalPrice(), action.getDateOfEvent(), LotSaleType.SPLIT_PARTIAL);
+          lot,
+          sharesToSell,
+          action.getOriginalPrice(),
+          action.getDateOfEvent(),
+          LotSaleType.SPLIT_PARTIAL);
     }
 
     log.info(

@@ -1,12 +1,11 @@
 package com.portfoliowatch.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.portfoliowatch.model.dto.deserializer.LocalDateDeserializer;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.portfoliowatch.model.dto.deserializer.LocalDateDeserializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
